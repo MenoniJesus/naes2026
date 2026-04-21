@@ -1,0 +1,508 @@
+/* ============================================================
+   SOBRA NADA — Design System
+   Paleta 60-30-10
+   60% → Creme quente  rgb(255,251,230) #FFFBE6
+   30% → Laranja        rgb(255,145,0)   #FF9100
+   10% → Verde escuro   rgb(0,113,45)    #00712D
+   ============================================================ */
+
+:root {
+    /* --- paleta principal --- */
+    --cream:        #FFFBE6;
+    --orange:       #FF9100;
+    --orange-dark:  #e07e00;
+    --green:        #00712D;
+    --green-light:  #e6f4ec;
+
+    /* --- roles semanticos --- */
+    --bg:           var(--cream);
+    --surface:      #ffffff;
+    --text:         #1a1a1a;
+    --text-muted:   #555;
+    --border:       rgba(255,145,0,0.18);
+    --border-solid: #f0d8a8;
+}
+
+/* ---------- reset & base ---------- */
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Segoe UI', Inter, system-ui, -apple-system, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, p {
+    margin-top: 0;
+}
+
+h1, h2, h3 {
+    line-height: 1.25;
+}
+
+a {
+    transition: color 0.2s, opacity 0.2s;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* ---------- layout ---------- */
+
+.container {
+    width: min(1100px, 92%);
+    margin: 0 auto;
+}
+
+.site-main {
+    min-height: 70vh;
+}
+
+/* ---------- header (10% verde) ---------- */
+
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--green);
+    box-shadow: 0 2px 12px rgba(0,113,45,0.15);
+}
+
+.header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.75rem 0;
+}
+
+.brand {
+    color: var(--cream);
+    text-decoration: none;
+    font-size: 1.35rem;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+}
+
+.main-nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.main-nav a {
+    color: rgba(255,251,230,0.85);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.92rem;
+    padding: 0.35rem 0.65rem;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s;
+}
+
+.main-nav a:hover {
+    background: rgba(255,251,230,0.15);
+    color: var(--cream);
+}
+
+/* ---------- botoes ---------- */
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    border-radius: 10px;
+    border: 2px solid var(--orange);
+    background: var(--orange);
+    color: #fff;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 0.95rem;
+    padding: 0.65rem 1.3rem;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+
+.btn:hover {
+    background: var(--orange-dark);
+    border-color: var(--orange-dark);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(255,145,0,0.3);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--orange);
+}
+
+.btn-outline:hover {
+    background: var(--orange);
+    color: #fff;
+}
+
+/* Variante outline dentro do header (sobre fundo verde) */
+.site-header .btn-outline {
+    border-color: var(--cream);
+    color: var(--cream);
+}
+
+.site-header .btn-outline:hover {
+    background: var(--cream);
+    color: var(--green);
+}
+
+.site-header .btn {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: #fff;
+}
+
+.site-header .btn:hover {
+    background: var(--orange-dark);
+    border-color: var(--orange-dark);
+}
+
+.btn-green {
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+}
+
+.btn-green:hover {
+    background: #005a24;
+    border-color: #005a24;
+    box-shadow: 0 4px 14px rgba(0,113,45,0.3);
+}
+
+.btn-link {
+    font: inherit;
+    cursor: pointer;
+    background: none;
+    border: none;
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+    padding: 5rem 0 4rem;
+    background: var(--bg);
+}
+
+.hero-grid {
+    display: grid;
+    gap: 2.5rem;
+    grid-template-columns: 1.7fr 1fr;
+    align-items: center;
+}
+
+.eyebrow {
+    display: inline-block;
+    color: var(--green);
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.6rem;
+    background: var(--green-light);
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+}
+
+.hero h1 {
+    font-size: clamp(1.9rem, 3.4vw, 3rem);
+    line-height: 1.15;
+    margin-bottom: 1rem;
+    color: var(--text);
+}
+
+.hero-text {
+    color: var(--text-muted);
+    max-width: 58ch;
+    font-size: 1.05rem;
+}
+
+.hero-card {
+    background: var(--surface);
+    border: 2px solid var(--border-solid);
+    border-radius: 16px;
+    padding: 1.5rem 1.6rem;
+    box-shadow: 0 8px 32px rgba(255,145,0,0.08);
+}
+
+.hero-card h2 {
+    color: var(--orange);
+    font-size: 1.15rem;
+    margin-bottom: 0.8rem;
+}
+
+.hero-card ul {
+    margin: 0;
+    padding-left: 1.2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.hero-card li {
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.hero-card li::marker {
+    color: var(--orange);
+}
+
+.hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.6rem;
+}
+
+/* ---------- secoes ---------- */
+
+.section {
+    padding: 4rem 0;
+}
+
+.section-alt {
+    background: var(--surface);
+    border-top: 2px solid var(--border-solid);
+    border-bottom: 2px solid var(--border-solid);
+}
+
+.section h2 {
+    font-size: 1.6rem;
+    margin-bottom: 0.6rem;
+    color: var(--text);
+}
+
+.section > .container > p {
+    color: var(--text-muted);
+    max-width: 65ch;
+}
+
+/* ---------- cards ---------- */
+
+.cards {
+    margin-top: 1.6rem;
+    display: grid;
+    gap: 1.2rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.card {
+    background: var(--surface);
+    border: 2px solid var(--border-solid);
+    border-radius: 14px;
+    padding: 1.3rem 1.4rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(255,145,0,0.1);
+}
+
+.card h3 {
+    color: var(--orange);
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+}
+
+.card p {
+    color: var(--text-muted);
+    margin-bottom: 0;
+    font-size: 0.95rem;
+}
+
+/* ---------- login-box ---------- */
+
+.login-box {
+    background: var(--surface);
+    border: 2px solid var(--border-solid);
+    border-radius: 16px;
+    padding: 2rem;
+}
+
+.login-box h2 {
+    color: var(--green);
+}
+
+/* ---------- auth pages ---------- */
+
+.auth-box {
+    max-width: 520px;
+    background: var(--surface);
+    border: 2px solid var(--border-solid);
+    border-radius: 16px;
+    padding: 2rem;
+}
+
+.auth-box h1 {
+    color: var(--green);
+    margin-bottom: 0.5rem;
+}
+
+.auth-form p {
+    margin-bottom: 1rem;
+}
+
+.auth-form label {
+    display: block;
+    font-weight: 700;
+    font-size: 0.9rem;
+    margin-bottom: 0.25rem;
+    color: var(--text);
+}
+
+.auth-form input[type="text"],
+.auth-form input[type="password"],
+.auth-form input[type="email"],
+.auth-form input {
+    width: 100%;
+    border: 2px solid var(--border-solid);
+    border-radius: 10px;
+    padding: 0.6rem 0.8rem;
+    font: inherit;
+    font-size: 0.95rem;
+    background: var(--bg);
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.auth-form input:focus {
+    outline: none;
+    border-color: var(--orange);
+    box-shadow: 0 0 0 3px rgba(255,145,0,0.15);
+}
+
+.auth-links {
+    margin-top: 1rem;
+    font-size: 0.92rem;
+}
+
+/* ---------- text-link ---------- */
+
+.text-link {
+    color: var(--green);
+    font-weight: 700;
+    text-decoration: none;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s;
+}
+
+.text-link:hover {
+    border-bottom-color: var(--green);
+}
+
+/* ---------- logout ---------- */
+
+.logout-form {
+    margin: 0;
+    display: inline;
+}
+
+/* ---------- footer (10% verde) ---------- */
+
+.site-footer {
+    background: var(--green);
+    color: var(--cream);
+    margin-top: 2rem;
+}
+
+.footer-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 1.2rem 0;
+    font-size: 0.9rem;
+}
+
+.footer-row p {
+    margin: 0;
+    color: rgba(255,251,230,0.8);
+}
+
+/* ---------- utilidades ---------- */
+
+.text-orange { color: var(--orange); }
+.text-green  { color: var(--green); }
+.text-cream  { color: var(--cream); }
+.bg-cream    { background: var(--bg); }
+.bg-orange   { background: var(--orange); }
+.bg-green    { background: var(--green); }
+
+/* ---------- responsivo ---------- */
+
+@media (max-width: 900px) {
+    .hero-grid,
+    .cards {
+        grid-template-columns: 1fr;
+    }
+
+    .hero {
+        padding-top: 3.5rem;
+        padding-bottom: 2.5rem;
+    }
+
+    .hero h1 {
+        font-size: 1.7rem;
+    }
+
+    .header-row {
+        flex-wrap: wrap;
+    }
+
+    .main-nav {
+        gap: 0.4rem;
+    }
+
+    .auth-box {
+        padding: 1.4rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .header-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+
+    .hero-actions {
+        flex-direction: column;
+    }
+
+    .hero-actions .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    .footer-row {
+        flex-direction: column;
+        text-align: center;
+    }
+}

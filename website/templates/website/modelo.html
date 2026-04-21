@@ -1,0 +1,83 @@
+{% extends 'website/base.html' %}
+
+{% block title %}SobraNada | Menos desperdicio, mais acesso{% endblock %}
+
+{% block content %}
+<section id="apresentacao" class="hero">
+    <div class="container hero-grid">
+        <div>
+            <p class="eyebrow">Bem-vindo ao SobraNada</p>
+            <h1>Comida boa que sobrou no dia, com preco que cabe no seu bolso.</h1>
+            <p class="hero-text">
+                Conectamos estabelecimentos com excedentes do dia a pessoas que querem
+                comer bem pagando menos. Menos desperdicio, mais acesso, mais economia.
+            </p>
+            <div class="hero-actions">
+                <a class="btn" href="#login">Quero participar</a>
+                <a class="btn btn-outline" href="#sobre">Como funciona?</a>
+            </div>
+        </div>
+
+        <aside class="hero-card">
+            <h2>Impacto real</h2>
+            <ul>
+                <li>Menos comida jogada fora todos os dias</li>
+                <li>Economia de ate 60% para quem compra</li>
+                <li>Mais faturamento para o comercio local</li>
+            </ul>
+        </aside>
+    </div>
+</section>
+
+<section id="sobre" class="section section-alt">
+    <div class="container">
+        <h2>Como funciona?</h2>
+        <p>
+            O SobraNada facilita o encontro entre quem tem excedente e quem quer economizar.
+            Em tres passos simples, todo mundo sai ganhando.
+        </p>
+        <div class="cards">
+            <article class="card">
+                <h3>1. Estabelecimento publica</h3>
+                <p>Padarias, restaurantes e mercados anunciam kits com o que sobrou do dia a precos reduzidos.</p>
+            </article>
+            <article class="card">
+                <h3>2. Voce reserva</h3>
+                <p>Encontre ofertas perto de voce, reserve pelo app e retire no horario combinado.</p>
+            </article>
+            <article class="card">
+                <h3>3. Todo mundo ganha</h3>
+                <p>Voce economiza, o comercio fatura e o planeta agradece. Simples assim.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section id="contato" class="section">
+    <div class="container">
+        <h2>Fale com a gente</h2>
+        <p>Duvidas, parcerias ou sugestoes? Estamos no WhatsApp:</p>
+        <div class="hero-actions">
+            <a class="btn btn-green" href="https://wa.me/554497108707" target="_blank" rel="noopener noreferrer">
+                Chamar no WhatsApp
+            </a>
+        </div>
+    </div>
+</section>
+
+<section id="login" class="section section-alt">
+    <div class="container login-box">
+        {% if user.is_authenticated %}
+            <h2>Voce ja esta logado!</h2>
+            <p>Agora voce pode explorar as ofertas e acompanhar suas reservas.</p>
+        {% else %}
+            <h2>Entre na sua conta</h2>
+            <p>Acesse para reservar kits e acompanhar seus pedidos.</p>
+            <div class="hero-actions">
+                <a class="btn" href="{% url 'login' %}">Entrar</a>
+                <a class="btn btn-outline" href="{% url 'register' %}">Criar conta</a>
+            </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,21 @@
+<header class="site-header">
+    <div class="container header-row">
+        <a class="brand" href="{% url 'index' %}">SobraNada</a>
+
+        <nav class="main-nav" aria-label="Navegacao principal">
+            <a href="{% url 'index' %}#apresentacao">Inicio</a>
+            <a href="{% url 'index' %}#sobre">Como funciona</a>
+            <a href="{% url 'index' %}#contato">Contato</a>
+            {% if user.is_authenticated %}
+                <form class="logout-form" action="{% url 'logout' %}" method="post">
+                    {% csrf_token %}
+                    <button class="btn btn-outline btn-link" type="submit">Sair</button>
+                </form>
+            {% else %}
+                <a class="btn btn-outline" href="{% url 'login' %}">Login</a>
+                <a class="btn" href="{% url 'register' %}">Criar conta</a>
+            {% endif %}
+        </nav>
+    </div>
+</header>
+

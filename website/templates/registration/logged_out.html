@@ -1,0 +1,17 @@
+{% extends 'website/base.html' %}
+
+{% block title %}Sessao encerrada | SobraNada{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container auth-box">
+        <h1>Voce saiu da conta</h1>
+        <p>Sua sessao foi encerrada com seguranca.</p>
+        <div class="hero-actions">
+            <a class="btn" href="{% url 'login' %}">Entrar novamente</a>
+            <a class="btn btn-outline" href="{% url 'index' %}">Voltar para home</a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+

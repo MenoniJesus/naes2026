@@ -1,0 +1,27 @@
+{% extends 'website/base.html' %}
+
+{% block title %}Login | SobraNada{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container auth-box">
+        <h1>Login</h1>
+        <p>Entre para reservar kits e acompanhar seus pedidos.</p>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="btn" type="submit">Entrar</button>
+        </form>
+
+        <p class="auth-links">
+            <a class="text-link" href="{% url 'password_reset' %}">Esqueci minha senha</a>
+        </p>
+        <p class="auth-links">
+            Ainda nao tem conta?
+            <a class="text-link" href="{% url 'register' %}">Criar conta</a>
+        </p>
+    </div>
+</section>
+{% endblock %}
+

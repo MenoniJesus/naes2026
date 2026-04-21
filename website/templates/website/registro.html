@@ -1,0 +1,24 @@
+{% extends 'website/base.html' %}
+
+{% block title %}Criar conta | SobraNada{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container auth-box">
+        <h1>Criar conta</h1>
+        <p>Preencha os dados para comecar a usar o SobraNada.</p>
+
+        <form method="post" class="auth-form">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button class="btn" type="submit">Criar conta</button>
+        </form>
+
+        <p class="auth-links">
+            Ja tem conta?
+            <a class="text-link" href="{% url 'login' %}">Entrar</a>
+        </p>
+    </div>
+</section>
+{% endblock %}
+
