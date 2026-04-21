@@ -44,6 +44,10 @@ INSTALLED_APPS = [
     # Ativar meu apps
     "website.apps.WebsiteConfig",
     "sobraNada.apps.SobranadaConfig",
+
+    # Crispy
+    'crispy_forms',
+    'crispy_bootstrap5',
 ]
 
 MIDDLEWARE = [
@@ -140,3 +144,6 @@ LOGOUT_REDIRECT_URL = 'index'
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 DEFAULT_FROM_EMAIL = 'no-reply@sobranada.local'
 
+# Crispy
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"
