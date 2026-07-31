@@ -9,12 +9,19 @@ from .models import (
     Reserva, Avaliacao, Notificacao
 )
 
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+from braces.views import GroupRequiredMixin
+
+class BaseLoginMixin(LoginRequiredMixin):
+    login_url = reverse_lazy('login')
 
 # ─────────────────────────────────────────
 # ESTADO
 # ─────────────────────────────────────────
 
-class EstadoCreate(CreateView):
+class EstadoCreate(GroupRequiredMixin, CreateView):
+    group_required = ['admin']
     model = Estado
     fields = ['name', 'uf']
     template_name = 'sobraNada/form.html'
@@ -24,7 +31,7 @@ class EstadoCreate(CreateView):
         'botao': 'Criar Estado'
     }
 
-class EstadoUpdate(UpdateView):
+class EstadoUpdate(BaseLoginMixin, UpdateView):
     model = Estado
     fields = ['name', 'uf']
     template_name = 'sobraNada/form.html'
@@ -34,7 +41,7 @@ class EstadoUpdate(UpdateView):
         'botao': 'Atualizar Estado'
     }
 
-class EstadoDelete(DeleteView):
+class EstadoDelete(BaseLoginMixin, DeleteView):
     model = Estado
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('estado-list')
@@ -43,11 +50,11 @@ class EstadoDelete(DeleteView):
         'botao': 'Sim, excluir!'
     }
 
-class EstadoList(ListView):
+class EstadoList(BaseLoginMixin, ListView):
     model = Estado
     template_name = 'sobraNada/list/estado.html'
 
-class EstadoDetail(DetailView):
+class EstadoDetail(BaseLoginMixin, DetailView):
     model = Estado
     template_name = 'sobraNada/detail/estado.html'
 
@@ -56,7 +63,7 @@ class EstadoDetail(DetailView):
 # CIDADE
 # ─────────────────────────────────────────
 
-class CidadeCreate(CreateView):
+class CidadeCreate(BaseLoginMixin, CreateView):
     model = Cidade
     fields = ['estado', 'name']
     template_name = 'sobraNada/form.html'
@@ -66,7 +73,7 @@ class CidadeCreate(CreateView):
         'botao': 'Criar Cidade'
     }
 
-class CidadeUpdate(UpdateView):
+class CidadeUpdate(BaseLoginMixin, UpdateView):
     model = Cidade
     fields = ['estado', 'name']
     template_name = 'sobraNada/form.html'
@@ -76,7 +83,7 @@ class CidadeUpdate(UpdateView):
         'botao': 'Atualizar Cidade'
     }
 
-class CidadeDelete(DeleteView):
+class CidadeDelete(BaseLoginMixin, DeleteView):
     model = Cidade
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('cidade-list')
@@ -85,11 +92,11 @@ class CidadeDelete(DeleteView):
         'botao': 'Sim, excluir!'
     }
 
-class CidadeList(ListView):
+class CidadeList(BaseLoginMixin, ListView):
     model = Cidade
     template_name = 'sobraNada/list/cidade.html'
 
-class CidadeDetail(DetailView):
+class CidadeDetail(BaseLoginMixin, DetailView):
     model = Cidade
     template_name = 'sobraNada/detail/cidade.html'
 
@@ -98,7 +105,7 @@ class CidadeDetail(DetailView):
 # ENDEREÇO
 # ─────────────────────────────────────────
 
-class EnderecoCreate(CreateView):
+class EnderecoCreate(BaseLoginMixin, CreateView):
     model = Endereco
     fields = ['cidade', 'street', 'number', 'complement', 'neighborhood', 'zip_code']
     template_name = 'sobraNada/form.html'
@@ -108,7 +115,7 @@ class EnderecoCreate(CreateView):
         'botao': 'Criar Endereço'
     }
 
-class EnderecoUpdate(UpdateView):
+class EnderecoUpdate(BaseLoginMixin, UpdateView):
     model = Endereco
     fields = ['cidade', 'street', 'number', 'complement', 'neighborhood', 'zip_code']
     template_name = 'sobraNada/form.html'
@@ -118,7 +125,7 @@ class EnderecoUpdate(UpdateView):
         'botao': 'Atualizar Endereço'
     }
 
-class EnderecoDelete(DeleteView):
+class EnderecoDelete(BaseLoginMixin, DeleteView):
     model = Endereco
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('endereco-list')
@@ -127,11 +134,11 @@ class EnderecoDelete(DeleteView):
         'botao': 'Sim, excluir!'
     }
 
-class EnderecoList(ListView):
+class EnderecoList(BaseLoginMixin, ListView):
     model = Endereco
     template_name = 'sobraNada/list/endereco.html'
 
-class EnderecoDetail(DetailView):
+class EnderecoDetail(BaseLoginMixin, DetailView):
     model = Endereco
     template_name = 'sobraNada/detail/endereco.html'
 
@@ -140,7 +147,7 @@ class EnderecoDetail(DetailView):
 # PERFIL
 # ─────────────────────────────────────────
 
-class PerfilCreate(CreateView):
+class PerfilCreate(BaseLoginMixin, CreateView):
     model = Perfil
     fields = ['user', 'phone', 'endereco']
     template_name = 'sobraNada/form.html'
@@ -150,7 +157,7 @@ class PerfilCreate(CreateView):
         'botao': 'Criar Perfil'
     }
 
-class PerfilUpdate(UpdateView):
+class PerfilUpdate(BaseLoginMixin, UpdateView):
     model = Perfil
     fields = ['user', 'phone', 'endereco']
     template_name = 'sobraNada/form.html'
@@ -160,7 +167,7 @@ class PerfilUpdate(UpdateView):
         'botao': 'Atualizar Perfil'
     }
 
-class PerfilDelete(DeleteView):
+class PerfilDelete(BaseLoginMixin, DeleteView):
     model = Perfil
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('perfil-list')
@@ -169,11 +176,11 @@ class PerfilDelete(DeleteView):
         'botao': 'Sim, excluir!'
     }
 
-class PerfilList(ListView):
+class PerfilList(BaseLoginMixin, ListView):
     model = Perfil
     template_name = 'sobraNada/list/perfil.html'
 
-class PerfilDetail(DetailView):
+class PerfilDetail(BaseLoginMixin, DetailView):
     model = Perfil
     template_name = 'sobraNada/detail/perfil.html'
 
@@ -182,7 +189,7 @@ class PerfilDetail(DetailView):
 # CATEGORIA
 # ─────────────────────────────────────────
 
-class CategoriaCreate(CreateView):
+class CategoriaCreate(BaseLoginMixin, CreateView):
     model = Categoria
     fields = ['name', 'description']
     template_name = 'sobraNada/form.html'
@@ -192,7 +199,7 @@ class CategoriaCreate(CreateView):
         'botao': 'Criar Categoria'
     }
 
-class CategoriaUpdate(UpdateView):
+class CategoriaUpdate(BaseLoginMixin, UpdateView):
     model = Categoria
     fields = ['name', 'description']
     template_name = 'sobraNada/form.html'
@@ -202,7 +209,7 @@ class CategoriaUpdate(UpdateView):
         'botao': 'Atualizar Categoria'
     }
 
-class CategoriaDelete(DeleteView):
+class CategoriaDelete(BaseLoginMixin, DeleteView):
     model = Categoria
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('categoria-list')
@@ -211,11 +218,11 @@ class CategoriaDelete(DeleteView):
         'botao': 'Sim, excluir!'
     }
 
-class CategoriaList(ListView):
+class CategoriaList(BaseLoginMixin, ListView):
     model = Categoria
     template_name = 'sobraNada/list/categoria.html'
 
-class CategoriaDetail(DetailView):
+class CategoriaDetail(BaseLoginMixin, DetailView):
     model = Categoria
     template_name = 'sobraNada/detail/categoria.html'
 
@@ -224,7 +231,7 @@ class CategoriaDetail(DetailView):
 # ESTABELECIMENTO
 # ─────────────────────────────────────────
 
-class EstabelecimentoCreate(CreateView):
+class EstabelecimentoCreate(BaseLoginMixin, CreateView):
     model = Estabelecimento
     fields = ['user', 'endereco', 'categoria', 'name', 'description', 'photo', 'pickup_start', 'pickup_end', 'is_active']
     template_name = 'sobraNada/form.html'
@@ -234,7 +241,19 @@ class EstabelecimentoCreate(CreateView):
         'botao': 'Criar Estabelecimento'
     }
 
-class EstabelecimentoUpdate(UpdateView):
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+
+        url_sucesso = super().form_valid(form)
+
+        print(self.object)
+        self.object.nome = "ok - " + self.object.nome
+        self.object.save()
+
+        return url_sucesso
+        
+
+class EstabelecimentoUpdate(BaseLoginMixin, UpdateView):
     model = Estabelecimento
     fields = ['user', 'endereco', 'categoria', 'name', 'description', 'photo', 'pickup_start', 'pickup_end', 'is_active']
     template_name = 'sobraNada/form.html'
@@ -244,7 +263,7 @@ class EstabelecimentoUpdate(UpdateView):
         'botao': 'Atualizar Estabelecimento'
     }
 
-class EstabelecimentoDelete(DeleteView):
+class EstabelecimentoDelete(BaseLoginMixin, DeleteView):
     model = Estabelecimento
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('estabelecimento-list')
@@ -253,11 +272,11 @@ class EstabelecimentoDelete(DeleteView):
         'botao': 'Sim, excluir!'
     }
 
-class EstabelecimentoList(ListView):
+class EstabelecimentoList(BaseLoginMixin, ListView):
     model = Estabelecimento
     template_name = 'sobraNada/list/estabelecimento.html'
 
-class EstabelecimentoDetail(DetailView):
+class EstabelecimentoDetail(BaseLoginMixin, DetailView):
     model = Estabelecimento
     template_name = 'sobraNada/detail/estabelecimento.html'
 
@@ -266,7 +285,7 @@ class EstabelecimentoDetail(DetailView):
 # SACOLA
 # ─────────────────────────────────────────
 
-class SacolaCreate(CreateView):
+class SacolaCreate(BaseLoginMixin, CreateView):
     model = Sacola
     fields = ['estabelecimento', 'title', 'description', 'original_price', 'sale_price',
               'total_quantity', 'available_quantity', 'expiry_date', 'pickup_start', 'pickup_end', 'status']
@@ -277,7 +296,7 @@ class SacolaCreate(CreateView):
         'botao': 'Criar Sacola'
     }
 
-class SacolaUpdate(UpdateView):
+class SacolaUpdate(BaseLoginMixin, UpdateView):
     model = Sacola
     fields = ['estabelecimento', 'title', 'description', 'original_price', 'sale_price',
               'total_quantity', 'available_quantity', 'expiry_date', 'pickup_start', 'pickup_end', 'status']
@@ -288,7 +307,7 @@ class SacolaUpdate(UpdateView):
         'botao': 'Atualizar Sacola'
     }
 
-class SacolaDelete(DeleteView):
+class SacolaDelete(BaseLoginMixin, DeleteView):
     model = Sacola
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('sacola-list')
@@ -297,11 +316,11 @@ class SacolaDelete(DeleteView):
         'botao': 'Sim, excluir!'
     }
 
-class SacolaList(ListView):
+class SacolaList(BaseLoginMixin, ListView):
     model = Sacola
     template_name = 'sobraNada/list/sacola.html'
 
-class SacolaDetail(DetailView):
+class SacolaDetail(BaseLoginMixin, DetailView):
     model = Sacola
     template_name = 'sobraNada/detail/sacola.html'
 
@@ -310,7 +329,7 @@ class SacolaDetail(DetailView):
 # RESERVA
 # ─────────────────────────────────────────
 
-class ReservaCreate(CreateView):
+class ReservaCreate(BaseLoginMixin, CreateView):
     model = Reserva
     fields = ['user', 'sacola', 'quantity', 'status', 'pickup_code']
     template_name = 'sobraNada/form.html'
@@ -320,7 +339,7 @@ class ReservaCreate(CreateView):
         'botao': 'Criar Reserva'
     }
 
-class ReservaUpdate(UpdateView):
+class ReservaUpdate(BaseLoginMixin, UpdateView):
     model = Reserva
     fields = ['user', 'sacola', 'quantity', 'status', 'pickup_code', 'picked_up_at', 'cancelled_at']
     template_name = 'sobraNada/form.html'
@@ -330,7 +349,7 @@ class ReservaUpdate(UpdateView):
         'botao': 'Atualizar Reserva'
     }
 
-class ReservaDelete(DeleteView):
+class ReservaDelete(BaseLoginMixin, DeleteView):
     model = Reserva
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('reserva-list')
@@ -339,11 +358,11 @@ class ReservaDelete(DeleteView):
         'botao': 'Sim, excluir!'
     }
 
-class ReservaList(ListView):
+class ReservaList(BaseLoginMixin, ListView):
     model = Reserva
     template_name = 'sobraNada/list/reserva.html'
 
-class ReservaDetail(DetailView):
+class ReservaDetail(BaseLoginMixin, DetailView):
     model = Reserva
     template_name = 'sobraNada/detail/reserva.html'
 
@@ -352,7 +371,7 @@ class ReservaDetail(DetailView):
 # AVALIAÇÃO
 # ─────────────────────────────────────────
 
-class AvaliacaoCreate(CreateView):
+class AvaliacaoCreate(BaseLoginMixin, CreateView):
     model = Avaliacao
     fields = ['reserva', 'rating', 'comment']
     template_name = 'sobraNada/form.html'
@@ -362,7 +381,7 @@ class AvaliacaoCreate(CreateView):
         'botao': 'Criar Avaliação'
     }
 
-class AvaliacaoUpdate(UpdateView):
+class AvaliacaoUpdate(BaseLoginMixin, UpdateView):
     model = Avaliacao
     fields = ['reserva', 'rating', 'comment']
     template_name = 'sobraNada/form.html'
@@ -372,7 +391,7 @@ class AvaliacaoUpdate(UpdateView):
         'botao': 'Atualizar Avaliação'
     }
 
-class AvaliacaoDelete(DeleteView):
+class AvaliacaoDelete(BaseLoginMixin, DeleteView):
     model = Avaliacao
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('avaliacao-list')
@@ -381,11 +400,11 @@ class AvaliacaoDelete(DeleteView):
         'botao': 'Sim, excluir!'
     }
 
-class AvaliacaoList(ListView):
+class AvaliacaoList(BaseLoginMixin, ListView):
     model = Avaliacao
     template_name = 'sobraNada/list/avaliacao.html'
 
-class AvaliacaoDetail(DetailView):
+class AvaliacaoDetail(BaseLoginMixin, DetailView):
     model = Avaliacao
     template_name = 'sobraNada/detail/avaliacao.html'
 
@@ -394,7 +413,7 @@ class AvaliacaoDetail(DetailView):
 # NOTIFICAÇÃO
 # ─────────────────────────────────────────
 
-class NotificacaoCreate(CreateView):
+class NotificacaoCreate(BaseLoginMixin, CreateView):
     model = Notificacao
     fields = ['user', 'title', 'message', 'type', 'is_read']
     template_name = 'sobraNada/form.html'
@@ -404,7 +423,7 @@ class NotificacaoCreate(CreateView):
         'botao': 'Criar Notificação'
     }
 
-class NotificacaoUpdate(UpdateView):
+class NotificacaoUpdate(BaseLoginMixin, UpdateView):
     model = Notificacao
     fields = ['user', 'title', 'message', 'type', 'is_read']
     template_name = 'sobraNada/form.html'
@@ -414,7 +433,7 @@ class NotificacaoUpdate(UpdateView):
         'botao': 'Atualizar Notificação'
     }
 
-class NotificacaoDelete(DeleteView):
+class NotificacaoDelete(BaseLoginMixin, DeleteView):
     model = Notificacao
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('notificacao-list')
@@ -423,10 +442,10 @@ class NotificacaoDelete(DeleteView):
         'botao': 'Sim, excluir!'
     }
 
-class NotificacaoList(ListView):
+class NotificacaoList(BaseLoginMixin, ListView):
     model = Notificacao
     template_name = 'sobraNada/list/notificacao.html'
 
-class NotificacaoDetail(DetailView):
+class NotificacaoDetail(BaseLoginMixin, DetailView):
     model = Notificacao
     template_name = 'sobraNada/detail/notificacao.html'

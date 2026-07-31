@@ -10,6 +10,6 @@ class ContatoView(TemplateView):
 
 
 class RegisterView(CreateView):
-    template_name = "website/registro.html"
     form_class = UserCreationForm
+    template_name = "website/registro.html"
     success_url = reverse_lazy("login")

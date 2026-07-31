@@ -133,7 +133,8 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static_gcloud'
 STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Auth
@@ -147,3 +148,7 @@ DEFAULT_FROM_EMAIL = 'no-reply@sobranada.local'
 # Crispy
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+# Redirecionamento após login/logout
+LOGIN_REDIRECT_URL = 'index'
+LOGOUT_REDIRECT_URL = 'index'
