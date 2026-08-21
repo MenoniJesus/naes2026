@@ -31,7 +31,8 @@ class EstadoCreate(GroupRequiredMixin, CreateView):
         'botao': 'Criar Estado'
     }
 
-class EstadoUpdate(BaseLoginMixin, UpdateView):
+class EstadoUpdate(GroupRequiredMixin, UpdateView):
+    group_required = ['admin']
     model = Estado
     fields = ['name', 'uf']
     template_name = 'sobraNada/form.html'
@@ -41,7 +42,8 @@ class EstadoUpdate(BaseLoginMixin, UpdateView):
         'botao': 'Atualizar Estado'
     }
 
-class EstadoDelete(BaseLoginMixin, DeleteView):
+class EstadoDelete(GroupRequiredMixin, DeleteView):
+    group_required = ['admin']
     model = Estado
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('estado-list')
@@ -53,6 +55,7 @@ class EstadoDelete(BaseLoginMixin, DeleteView):
 class EstadoList(BaseLoginMixin, ListView):
     model = Estado
     template_name = 'sobraNada/list/estado.html'
+    paginate_by = 30
 
 class EstadoDetail(BaseLoginMixin, DetailView):
     model = Estado
@@ -95,6 +98,10 @@ class CidadeDelete(BaseLoginMixin, DeleteView):
 class CidadeList(BaseLoginMixin, ListView):
     model = Cidade
     template_name = 'sobraNada/list/cidade.html'
+    paginate_by = 30
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('estado')
 
 class CidadeDetail(BaseLoginMixin, DetailView):
     model = Cidade
@@ -137,6 +144,10 @@ class EnderecoDelete(BaseLoginMixin, DeleteView):
 class EnderecoList(BaseLoginMixin, ListView):
     model = Endereco
     template_name = 'sobraNada/list/endereco.html'
+    paginate_by = 30
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('cidade')
 
 class EnderecoDetail(BaseLoginMixin, DetailView):
     model = Endereco
@@ -179,6 +190,10 @@ class PerfilDelete(BaseLoginMixin, DeleteView):
 class PerfilList(BaseLoginMixin, ListView):
     model = Perfil
     template_name = 'sobraNada/list/perfil.html'
+    paginate_by = 30
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('user')
 
 class PerfilDetail(BaseLoginMixin, DetailView):
     model = Perfil
@@ -189,7 +204,8 @@ class PerfilDetail(BaseLoginMixin, DetailView):
 # CATEGORIA
 # ─────────────────────────────────────────
 
-class CategoriaCreate(BaseLoginMixin, CreateView):
+class CategoriaCreate(GroupRequiredMixin, CreateView):
+    group_required = ['admin']
     model = Categoria
     fields = ['name', 'description']
     template_name = 'sobraNada/form.html'
@@ -199,7 +215,8 @@ class CategoriaCreate(BaseLoginMixin, CreateView):
         'botao': 'Criar Categoria'
     }
 
-class CategoriaUpdate(BaseLoginMixin, UpdateView):
+class CategoriaUpdate(GroupRequiredMixin, UpdateView):
+    group_required = ['admin']
     model = Categoria
     fields = ['name', 'description']
     template_name = 'sobraNada/form.html'
@@ -209,7 +226,8 @@ class CategoriaUpdate(BaseLoginMixin, UpdateView):
         'botao': 'Atualizar Categoria'
     }
 
-class CategoriaDelete(BaseLoginMixin, DeleteView):
+class CategoriaDelete(GroupRequiredMixin, DeleteView):
+    group_required = ['admin']
     model = Categoria
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('categoria-list')
@@ -221,6 +239,7 @@ class CategoriaDelete(BaseLoginMixin, DeleteView):
 class CategoriaList(BaseLoginMixin, ListView):
     model = Categoria
     template_name = 'sobraNada/list/categoria.html'
+    paginate_by = 30
 
 class CategoriaDetail(BaseLoginMixin, DetailView):
     model = Categoria
@@ -275,6 +294,10 @@ class EstabelecimentoDelete(BaseLoginMixin, DeleteView):
 class EstabelecimentoList(BaseLoginMixin, ListView):
     model = Estabelecimento
     template_name = 'sobraNada/list/estabelecimento.html'
+    paginate_by = 30
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('categoria')
 
 class EstabelecimentoDetail(BaseLoginMixin, DetailView):
     model = Estabelecimento
@@ -319,6 +342,10 @@ class SacolaDelete(BaseLoginMixin, DeleteView):
 class SacolaList(BaseLoginMixin, ListView):
     model = Sacola
     template_name = 'sobraNada/list/sacola.html'
+    paginate_by = 30
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('estabelecimento')
 
 class SacolaDetail(BaseLoginMixin, DetailView):
     model = Sacola
@@ -361,6 +388,10 @@ class ReservaDelete(BaseLoginMixin, DeleteView):
 class ReservaList(BaseLoginMixin, ListView):
     model = Reserva
     template_name = 'sobraNada/list/reserva.html'
+    paginate_by = 30
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('user', 'sacola')
 
 class ReservaDetail(BaseLoginMixin, DetailView):
     model = Reserva
@@ -403,6 +434,10 @@ class AvaliacaoDelete(BaseLoginMixin, DeleteView):
 class AvaliacaoList(BaseLoginMixin, ListView):
     model = Avaliacao
     template_name = 'sobraNada/list/avaliacao.html'
+    paginate_by = 30
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('reserva')
 
 class AvaliacaoDetail(BaseLoginMixin, DetailView):
     model = Avaliacao
@@ -445,6 +480,10 @@ class NotificacaoDelete(BaseLoginMixin, DeleteView):
 class NotificacaoList(BaseLoginMixin, ListView):
     model = Notificacao
     template_name = 'sobraNada/list/notificacao.html'
+    paginate_by = 30
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('user')
 
 class NotificacaoDetail(BaseLoginMixin, DetailView):
     model = Notificacao

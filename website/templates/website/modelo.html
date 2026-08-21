@@ -70,6 +70,9 @@
         {% if user.is_authenticated %}
             <h2>Voce ja esta logado!</h2>
             <p>Agora voce pode explorar as ofertas e acompanhar suas reservas.</p>
+            <div class="hero-actions">
+                <a class="btn" href="{% url 'hub' %}">Ir para o painel</a>
+            </div>
         {% else %}
             <h2>Entre na sua conta</h2>
             <p>Acesse para reservar kits e acompanhar seus pedidos.</p>

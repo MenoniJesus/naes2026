@@ -1,6 +1,6 @@
 from django.urls import include, path
 
-from .views import ContatoView, IndexView, RegisterView
+from .views import ContatoView, HubView, IndexView, RegisterView
 
 # importar as views para gerenciamento de usuario
 from django.contrib.auth.views import (
@@ -11,6 +11,7 @@ from django.contrib.auth.views import (
 
 urlpatterns = [
     path("", IndexView.as_view(), name="index"),
+    path("hub/", HubView.as_view(), name="hub"),
     path("contato/", ContatoView.as_view(), name="contato"),
     path("register/", RegisterView.as_view(), name="register"),
     

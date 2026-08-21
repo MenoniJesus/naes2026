@@ -7,6 +7,7 @@
             <a href="{% url 'index' %}#sobre">Como funciona</a>
             <a href="{% url 'index' %}#contato">Contato</a>
             {% if user.is_authenticated %}
+                <a class="btn" href="{% url 'hub' %}">Painel</a>
                 <form class="logout-form" action="{% url 'logout' %}" method="post">
                     {% csrf_token %}
                     <button class="btn btn-outline btn-link" type="submit">Sair</button>

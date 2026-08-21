@@ -1,0 +1,140 @@
+{% extends "website/modelo2.html" %}
+{% block title %}Painel | SobraNada{% endblock %}
+{% block content %}
+<div class="mb-4">
+  <h2 class="mb-1">Olá, {{ user.username }}</h2>
+  <p class="text-muted mb-0">O que você quer visualizar hoje?</p>
+</div>
+
+<h5 class="text-muted text-uppercase mb-3" style="font-size: .85rem; letter-spacing: .05em;">Localização</h5>
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-4 col-lg-3">
+    <a href="{% url 'estado-list' %}" class="card shadow-sm text-decoration-none h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-map fs-2 text-primary"></i>
+        <div class="mt-2 fw-semibold text-dark">Estados</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-6 col-md-4 col-lg-3">
+    <a href="{% url 'cidade-list' %}" class="card shadow-sm text-decoration-none h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-building fs-2 text-primary"></i>
+        <div class="mt-2 fw-semibold text-dark">Cidades</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-6 col-md-4 col-lg-3">
+    <a href="{% url 'endereco-list' %}" class="card shadow-sm text-decoration-none h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-geo-alt fs-2 text-primary"></i>
+        <div class="mt-2 fw-semibold text-dark">Endereços</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-6 col-md-4 col-lg-3">
+    <a href="{% url 'perfil-list' %}" class="card shadow-sm text-decoration-none h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-person fs-2 text-primary"></i>
+        <div class="mt-2 fw-semibold text-dark">Perfis</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<h5 class="text-muted text-uppercase mb-3" style="font-size: .85rem; letter-spacing: .05em;">Catálogo</h5>
+<div class="row g-3 mb-4">
+  <div class="col-6 col-md-4 col-lg-3">
+    <a href="{% url 'categoria-list' %}" class="card shadow-sm text-decoration-none h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-tag fs-2 text-success"></i>
+        <div class="mt-2 fw-semibold text-dark">Categorias</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-6 col-md-4 col-lg-3">
+    <a href="{% url 'estabelecimento-list' %}" class="card shadow-sm text-decoration-none h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-shop fs-2 text-success"></i>
+        <div class="mt-2 fw-semibold text-dark">Estabelecimentos</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-6 col-md-4 col-lg-3">
+    <a href="{% url 'sacola-list' %}" class="card shadow-sm text-decoration-none h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-bag fs-2 text-success"></i>
+        <div class="mt-2 fw-semibold text-dark">Sacolas</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<h5 class="text-muted text-uppercase mb-3" style="font-size: .85rem; letter-spacing: .05em;">Operação</h5>
+<div class="row g-3">
+  <div class="col-6 col-md-4 col-lg-3">
+    <a href="{% url 'reserva-list' %}" class="card shadow-sm text-decoration-none h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-calendar-check fs-2 text-warning"></i>
+        <div class="mt-2 fw-semibold text-dark">Reservas</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-6 col-md-4 col-lg-3">
+    <a href="{% url 'avaliacao-list' %}" class="card shadow-sm text-decoration-none h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-star fs-2 text-warning"></i>
+        <div class="mt-2 fw-semibold text-dark">Avaliações</div>
+      </div>
+    </a>
+  </div>
+  <div class="col-6 col-md-4 col-lg-3">
+    <a href="{% url 'notificacao-list' %}" class="card shadow-sm text-decoration-none h-100">
+      <div class="card-body text-center py-4">
+        <i class="bi bi-bell fs-2 text-warning"></i>
+        <div class="mt-2 fw-semibold text-dark">Notificações</div>
+      </div>
+    </a>
+  </div>
+</div>
+
+<h5 class="text-muted text-uppercase mb-3 mt-4" style="font-size: .85rem; letter-spacing: .05em;">Recentes</h5>
+<div class="row g-3">
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-white fw-semibold"><i class="bi bi-bag me-2"></i>Sacolas recentes</div>
+      <ul class="list-group list-group-flush">
+        {% for sacola in sacolas_recentes %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <a href="{% url 'sacola-detail' sacola.pk %}" class="text-decoration-none text-dark">
+            {{ sacola.title }}
+            <div class="small text-muted">{{ sacola.estabelecimento }}</div>
+          </a>
+          <span class="badge bg-light text-dark">R$ {{ sacola.sale_price }}</span>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">Nenhuma sacola cadastrada ainda.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-white fw-semibold"><i class="bi bi-calendar-check me-2"></i>Reservas recentes</div>
+      <ul class="list-group list-group-flush">
+        {% for reserva in reservas_recentes %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+          <a href="{% url 'reserva-detail' reserva.pk %}" class="text-decoration-none text-dark">
+            {{ reserva.sacola }}
+            <div class="small text-muted">{{ reserva.user }}</div>
+          </a>
+          <span class="badge bg-light text-dark">{{ reserva.get_status_display }}</span>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">Nenhuma reserva cadastrada ainda.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+</div>
+{% endblock %}
