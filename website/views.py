@@ -15,7 +15,7 @@ class HubView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['sacolas_recentes'] = Sacola.objects.select_related('estabelecimento').order_by('-created_at')[:5]
+        context['sacolas_recentes'] = Sacola.objects.prefetch_related('produtos__estabelecimento').order_by('-created_at')[:5]
         context['reservas_recentes'] = Reserva.objects.select_related('user', 'sacola').order_by('-reserved_at')[:5]
         return context
 

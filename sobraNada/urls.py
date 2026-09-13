@@ -6,8 +6,9 @@ from .views import (
     PerfilCreate, PerfilUpdate, PerfilDelete, PerfilList, PerfilDetail,
     CategoriaCreate, CategoriaUpdate, CategoriaDelete, CategoriaList, CategoriaDetail,
     EstabelecimentoCreate, EstabelecimentoUpdate, EstabelecimentoDelete, EstabelecimentoList, EstabelecimentoDetail,
+    ProdutoCreate, ProdutoUpdate, ProdutoDelete, ProdutoList, ProdutoDetail,
     SacolaCreate, SacolaUpdate, SacolaDelete, SacolaList, SacolaDetail,
-    ReservaCreate, ReservaUpdate, ReservaDelete, ReservaList, ReservaDetail,
+    ReservaCreate, ReservaUpdate, ReservaCancelar, ReservaDelete, ReservaList, ReservaDetail,
     AvaliacaoCreate, AvaliacaoUpdate, AvaliacaoDelete, AvaliacaoList, AvaliacaoDetail,
     NotificacaoCreate, NotificacaoUpdate, NotificacaoDelete, NotificacaoList, NotificacaoDetail,
 )
@@ -55,6 +56,13 @@ urlpatterns = [
     path('listar/estabelecimento/', EstabelecimentoList.as_view(), name='estabelecimento-list'),
     path('detalhar/estabelecimento/<int:pk>/', EstabelecimentoDetail.as_view(), name='estabelecimento-detail'),
 
+    # Produto
+    path('cadastrar/produto/', ProdutoCreate.as_view(), name='produto-create'),
+    path('atualizar/produto/<int:pk>/', ProdutoUpdate.as_view(), name='produto-update'),
+    path('excluir/produto/<int:pk>/', ProdutoDelete.as_view(), name='produto-delete'),
+    path('listar/produto/', ProdutoList.as_view(), name='produto-list'),
+    path('detalhar/produto/<int:pk>/', ProdutoDetail.as_view(), name='produto-detail'),
+
     # Sacola
     path('cadastrar/sacola/', SacolaCreate.as_view(), name='sacola-create'),
     path('atualizar/sacola/<int:pk>/', SacolaUpdate.as_view(), name='sacola-update'),
@@ -65,6 +73,7 @@ urlpatterns = [
     # Reserva
     path('cadastrar/reserva/', ReservaCreate.as_view(), name='reserva-create'),
     path('atualizar/reserva/<int:pk>/', ReservaUpdate.as_view(), name='reserva-update'),
+    path('cancelar/reserva/<int:pk>/', ReservaCancelar.as_view(), name='reserva-cancelar'),
     path('excluir/reserva/<int:pk>/', ReservaDelete.as_view(), name='reserva-delete'),
     path('listar/reserva/', ReservaList.as_view(), name='reserva-list'),
     path('detalhar/reserva/<int:pk>/', ReservaDetail.as_view(), name='reserva-detail'),

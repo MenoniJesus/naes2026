@@ -8,19 +8,27 @@
 <div class="card shadow-sm">
   <div class="card-body p-4">
     <table class="table mb-0">
-      <thead><tr><th>ID</th><th>Usuário</th><th>Sacola</th><th>Qtd</th><th>Status</th><th class="text-center">Ações</th></tr></thead>
+      <thead><tr><th>ID</th><th>Usuário</th><th>Sacola</th><th>Qtd</th><th>Total</th><th>Desconto</th><th>Status</th><th class="text-center">Ações</th></tr></thead>
       <tbody>
         {% for obj in object_list %}
         <tr>
           <td>{{ obj.pk }}</td><td>{{ obj.user }}</td><td>{{ obj.sacola }}</td>
-          <td>{{ obj.quantity }}</td><td>{{ obj.get_status_display }}</td>
+          <td>{{ obj.quantity }}</td>
+          <td>R$ {{ obj.total_price }}</td>
+          <td>{{ obj.discount_percent }}%</td>
+          <td>{{ obj.get_status_display }}</td>
           <td class="text-center">
             <a href="{% url 'reserva-detail' obj.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
+            {% if obj.user == user %}
             <a href="{% url 'reserva-update' obj.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
+            {% if obj.esta_ativa %}
+            <a href="{% url 'reserva-cancelar' obj.pk %}" class="btn btn-sm btn-outline-warning"><i class="bi bi-x-octagon"></i></a>
+            {% endif %}
             <a href="{% url 'reserva-delete' obj.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+            {% endif %}
           </td>
         </tr>
-        {% empty %}<tr><td colspan="6" class="text-center text-muted py-4">Nenhuma reserva cadastrada.</td></tr>{% endfor %}
+        {% empty %}<tr><td colspan="8" class="text-center text-muted py-4">Nenhuma reserva cadastrada.</td></tr>{% endfor %}
       </tbody>
     </table>
   </div>

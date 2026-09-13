@@ -16,13 +16,23 @@
         <p><strong>Sacola:</strong> {{ object.sacola }}</p>
         <p><strong>Quantidade:</strong> {{ object.quantity }}</p>
         <p><strong>Status:</strong> {{ object.get_status_display }}</p>
-        <p><strong>Código de retirada:</strong> {{ object.pickup_code }}</p>
+
+        <div class="alert alert-success">
+          <p class="mb-1"><strong>Desconto aplicado:</strong> {{ object.discount_percent }}%</p>
+          <p class="mb-1"><strong>Preço unitário:</strong> R$ {{ object.unit_price }}</p>
+          <p class="mb-0 fs-5"><strong>Total pago:</strong> R$ {{ object.total_price }}</p>
+        </div>
+
+        <p><strong>Código de retirada:</strong> <code class="fs-5">{{ object.pickup_code }}</code></p>
         <p><strong>Reservado em:</strong> {{ object.reserved_at|date:"d/m/Y H:i" }}</p>
         <p><strong>Retirado em:</strong> {{ object.picked_up_at|date:"d/m/Y H:i"|default:"-" }}</p>
         <p><strong>Cancelado em:</strong> {{ object.cancelled_at|date:"d/m/Y H:i"|default:"-" }}</p>
       </div>
       <div class="card-footer bg-light p-3 d-flex gap-2">
+        {% if object.esta_ativa and object.user == user %}
         <a href="{% url 'reserva-update' object.pk %}" class="btn btn-primary"><i class="bi bi-pencil me-2"></i>Editar</a>
+        <a href="{% url 'reserva-cancelar' object.pk %}" class="btn btn-outline-danger"><i class="bi bi-x-octagon me-2"></i>Cancelar reserva</a>
+        {% endif %}
         <a href="#" class="btn btn-outline-secondary" onclick="window.history.back()"><i class="bi bi-arrow-left me-2"></i>Voltar</a>
       </div>
     </div>

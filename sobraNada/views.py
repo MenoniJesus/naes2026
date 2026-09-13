@@ -1,20 +1,62 @@
+from django.contrib import messages
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db import transaction
+from django.db.models import Q
+from django.shortcuts import redirect
+from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
-from django.urls import reverse_lazy
-
-from .models import (
-    Estado, Cidade, Endereco, Perfil,
-    Categoria, Estabelecimento, Sacola,
-    Reserva, Avaliacao, Notificacao
-)
-
-from django.contrib.auth.mixins import LoginRequiredMixin
 
 from braces.views import GroupRequiredMixin
 
+from .forms import (
+    AvaliacaoForm, EstabelecimentoForm, NotificacaoForm, PerfilForm,
+    ProdutoForm, ReservaForm, ReservaUpdateForm, SacolaForm, SacolaUpdateForm,
+)
+from .models import (
+    Estado, Cidade, Endereco, Perfil,
+    Categoria, Estabelecimento, Produto, Sacola,
+    Reserva, Avaliacao, Notificacao
+)
+
+AJUDA_SACOLA = (
+    "O preço original é calculado automaticamente somando o preço dos produtos "
+    "escolhidos, e o estabelecimento da sacola vem desses mesmos produtos."
+)
+
+AJUDA_DESCONTO = (
+    "Desconto por faixa do total da reserva (preço da sacola x quantidade): "
+    "até R$ 100,00 sem desconto · R$ 100,01 a 250,00: 10% · "
+    "R$ 250,01 a 500,00: 20% · R$ 500,01 a 1.000,00: 25% · acima de R$ 1.000,00: 30%."
+)
+
+
 class BaseLoginMixin(LoginRequiredMixin):
     login_url = reverse_lazy('login')
+
+
+class DonoMixin:
+    """Restringe o queryset da view aos registros do usuário logado."""
+    campo_dono = 'user'
+
+    def get_queryset(self):
+        return super().get_queryset().filter(**{self.campo_dono: self.request.user})
+
+
+class RegistroUnicoMixin:
+    """Impede um segundo cadastro quando o usuário já possui o registro."""
+    relacao_existente = None
+    rota_existente = None
+    aviso_existente = ''
+
+    def dispatch(self, request, *args, **kwargs):
+        existente = getattr(request.user, self.relacao_existente, None)
+        if existente is not None:
+            messages.info(request, self.aviso_existente)
+            return redirect(self.rota_existente, pk=existente.pk)
+        return super().dispatch(request, *args, **kwargs)
+
 
 # ─────────────────────────────────────────
 # ESTADO
@@ -158,19 +200,26 @@ class EnderecoDetail(BaseLoginMixin, DetailView):
 # PERFIL
 # ─────────────────────────────────────────
 
-class PerfilCreate(BaseLoginMixin, CreateView):
+class PerfilCreate(BaseLoginMixin, RegistroUnicoMixin, CreateView):
     model = Perfil
-    fields = ['user', 'phone', 'endereco']
+    form_class = PerfilForm
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('perfil-list')
+    relacao_existente = 'perfil'
+    rota_existente = 'perfil-update'
+    aviso_existente = "Você já possui um perfil. Edite os dados por aqui."
     extra_context = {
         'titulo': 'Cadastro de Perfil',
         'botao': 'Criar Perfil'
     }
 
-class PerfilUpdate(BaseLoginMixin, UpdateView):
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+class PerfilUpdate(BaseLoginMixin, DonoMixin, UpdateView):
     model = Perfil
-    fields = ['user', 'phone', 'endereco']
+    form_class = PerfilForm
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('perfil-list')
     extra_context = {
@@ -178,7 +227,7 @@ class PerfilUpdate(BaseLoginMixin, UpdateView):
         'botao': 'Atualizar Perfil'
     }
 
-class PerfilDelete(BaseLoginMixin, DeleteView):
+class PerfilDelete(BaseLoginMixin, DonoMixin, DeleteView):
     model = Perfil
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('perfil-list')
@@ -187,7 +236,7 @@ class PerfilDelete(BaseLoginMixin, DeleteView):
         'botao': 'Sim, excluir!'
     }
 
-class PerfilList(BaseLoginMixin, ListView):
+class PerfilList(BaseLoginMixin, DonoMixin, ListView):
     model = Perfil
     template_name = 'sobraNada/list/perfil.html'
     paginate_by = 30
@@ -195,7 +244,7 @@ class PerfilList(BaseLoginMixin, ListView):
     def get_queryset(self):
         return super().get_queryset().select_related('user')
 
-class PerfilDetail(BaseLoginMixin, DetailView):
+class PerfilDetail(BaseLoginMixin, DonoMixin, DetailView):
     model = Perfil
     template_name = 'sobraNada/detail/perfil.html'
 
@@ -250,11 +299,14 @@ class CategoriaDetail(BaseLoginMixin, DetailView):
 # ESTABELECIMENTO
 # ─────────────────────────────────────────
 
-class EstabelecimentoCreate(BaseLoginMixin, CreateView):
+class EstabelecimentoCreate(BaseLoginMixin, RegistroUnicoMixin, CreateView):
     model = Estabelecimento
-    fields = ['user', 'endereco', 'categoria', 'name', 'description', 'photo', 'pickup_start', 'pickup_end', 'is_active']
+    form_class = EstabelecimentoForm
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('estabelecimento-list')
+    relacao_existente = 'estabelecimento'
+    rota_existente = 'estabelecimento-update'
+    aviso_existente = "Cada usuário pode ter apenas um estabelecimento."
     extra_context = {
         'titulo': 'Cadastro de Estabelecimento',
         'botao': 'Criar Estabelecimento'
@@ -262,19 +314,12 @@ class EstabelecimentoCreate(BaseLoginMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
+        return super().form_valid(form)
 
-        url_sucesso = super().form_valid(form)
 
-        print(self.object)
-        self.object.nome = "ok - " + self.object.nome
-        self.object.save()
-
-        return url_sucesso
-        
-
-class EstabelecimentoUpdate(BaseLoginMixin, UpdateView):
+class EstabelecimentoUpdate(BaseLoginMixin, DonoMixin, UpdateView):
     model = Estabelecimento
-    fields = ['user', 'endereco', 'categoria', 'name', 'description', 'photo', 'pickup_start', 'pickup_end', 'is_active']
+    form_class = EstabelecimentoForm
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('estabelecimento-list')
     extra_context = {
@@ -282,7 +327,7 @@ class EstabelecimentoUpdate(BaseLoginMixin, UpdateView):
         'botao': 'Atualizar Estabelecimento'
     }
 
-class EstabelecimentoDelete(BaseLoginMixin, DeleteView):
+class EstabelecimentoDelete(BaseLoginMixin, DonoMixin, DeleteView):
     model = Estabelecimento
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('estabelecimento-list')
@@ -305,30 +350,84 @@ class EstabelecimentoDetail(BaseLoginMixin, DetailView):
 
 
 # ─────────────────────────────────────────
+# PRODUTO
+# ─────────────────────────────────────────
+
+class ProdutoCreate(BaseLoginMixin, CreateView):
+    model = Produto
+    form_class = ProdutoForm
+    template_name = 'sobraNada/form.html'
+    success_url = reverse_lazy('produto-list')
+    extra_context = {
+        'titulo': 'Cadastro de Produto',
+        'botao': 'Criar Produto'
+    }
+
+class ProdutoUpdate(BaseLoginMixin, UpdateView):
+    model = Produto
+    form_class = ProdutoForm
+    template_name = 'sobraNada/form.html'
+    success_url = reverse_lazy('produto-list')
+    extra_context = {
+        'titulo': 'Editar Produto',
+        'botao': 'Atualizar Produto'
+    }
+
+class ProdutoDelete(BaseLoginMixin, DeleteView):
+    model = Produto
+    template_name = 'sobraNada/form.html'
+    success_url = reverse_lazy('produto-list')
+    extra_context = {
+        'titulo': 'Excluir Produto',
+        'botao': 'Sim, excluir!'
+    }
+
+class ProdutoList(BaseLoginMixin, ListView):
+    model = Produto
+    template_name = 'sobraNada/list/produto.html'
+    paginate_by = 30
+
+    def get_queryset(self):
+        return super().get_queryset().select_related('estabelecimento')
+
+class ProdutoDetail(BaseLoginMixin, DetailView):
+    model = Produto
+    template_name = 'sobraNada/detail/produto.html'
+
+
+# ─────────────────────────────────────────
 # SACOLA
 # ─────────────────────────────────────────
 
 class SacolaCreate(BaseLoginMixin, CreateView):
     model = Sacola
-    fields = ['estabelecimento', 'title', 'description', 'original_price', 'sale_price',
-              'total_quantity', 'available_quantity', 'expiry_date', 'pickup_start', 'pickup_end', 'status']
+    form_class = SacolaForm
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('sacola-list')
     extra_context = {
         'titulo': 'Cadastro de Sacola',
-        'botao': 'Criar Sacola'
+        'botao': 'Criar Sacola',
+        'ajuda': AJUDA_SACOLA,
     }
+
 
 class SacolaUpdate(BaseLoginMixin, UpdateView):
     model = Sacola
-    fields = ['estabelecimento', 'title', 'description', 'original_price', 'sale_price',
-              'total_quantity', 'available_quantity', 'expiry_date', 'pickup_start', 'pickup_end', 'status']
+    form_class = SacolaUpdateForm
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('sacola-list')
     extra_context = {
         'titulo': 'Editar Sacola',
-        'botao': 'Atualizar Sacola'
+        'botao': 'Atualizar Sacola',
+        'ajuda': AJUDA_SACOLA,
     }
+
+    def form_valid(self, form):
+        # Mexer no total repassa a diferença para o estoque ainda não reservado.
+        delta = form.cleaned_data['total_quantity'] - form.initial['total_quantity']
+        form.instance.available_quantity = max(form.instance.available_quantity + delta, 0)
+        return super().form_valid(form)
+
 
 class SacolaDelete(BaseLoginMixin, DeleteView):
     model = Sacola
@@ -345,7 +444,7 @@ class SacolaList(BaseLoginMixin, ListView):
     paginate_by = 30
 
     def get_queryset(self):
-        return super().get_queryset().select_related('estabelecimento')
+        return super().get_queryset().prefetch_related('produtos__estabelecimento')
 
 class SacolaDetail(BaseLoginMixin, DetailView):
     model = Sacola
@@ -358,25 +457,103 @@ class SacolaDetail(BaseLoginMixin, DetailView):
 
 class ReservaCreate(BaseLoginMixin, CreateView):
     model = Reserva
-    fields = ['user', 'sacola', 'quantity', 'status', 'pickup_code']
+    form_class = ReservaForm
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('reserva-list')
     extra_context = {
-        'titulo': 'Cadastro de Reserva',
-        'botao': 'Criar Reserva'
+        'titulo': 'Nova Reserva',
+        'botao': 'Reservar',
+        'ajuda': AJUDA_DESCONTO,
     }
 
-class ReservaUpdate(BaseLoginMixin, UpdateView):
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        form.instance.aplicar_desconto(form.desconto)
+
+        with transaction.atomic():
+            sacola = Sacola.objects.select_for_update().get(pk=form.instance.sacola_id)
+            try:
+                sacola.reservar(form.instance.quantity)
+            except ValueError as erro:
+                transaction.set_rollback(True)
+                form.add_error('quantity', str(erro))
+                return self.form_invalid(form)
+
+            resposta = super().form_valid(form)
+
+            Notificacao.objects.create(
+                user=self.request.user,
+                title="Reserva registrada",
+                message=(
+                    f"Sua reserva de {self.object.quantity}x \"{sacola.title}\" "
+                    f"saiu por R$ {self.object.total_price}. "
+                    f"Código de retirada: {self.object.pickup_code}."
+                ),
+                type="reserva",
+            )
+
+        messages.success(
+            self.request,
+            f"Reserva feita! Código de retirada: {self.object.pickup_code}"
+        )
+        return resposta
+
+
+class ReservaUpdate(BaseLoginMixin, DonoMixin, UpdateView):
     model = Reserva
-    fields = ['user', 'sacola', 'quantity', 'status', 'pickup_code', 'picked_up_at', 'cancelled_at']
+    form_class = ReservaUpdateForm
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('reserva-list')
     extra_context = {
-        'titulo': 'Editar Reserva',
-        'botao': 'Atualizar Reserva'
+        'titulo': 'Alterar Quantidade da Reserva',
+        'botao': 'Atualizar Reserva',
+        'ajuda': AJUDA_DESCONTO,
     }
 
-class ReservaDelete(BaseLoginMixin, DeleteView):
+    def get_object(self, queryset=None):
+        reserva = super().get_object(queryset)
+        # O form já terá substituído a quantidade pela nova quando form_valid rodar.
+        self.quantidade_original = reserva.quantity
+        return reserva
+
+    def form_valid(self, form):
+        with transaction.atomic():
+            sacola = Sacola.objects.select_for_update().get(pk=self.object.sacola_id)
+            sacola.devolver(self.quantidade_original)
+            try:
+                sacola.reservar(form.cleaned_data['quantity'])
+            except ValueError as erro:
+                transaction.set_rollback(True)
+                form.add_error('quantity', str(erro))
+                return self.form_invalid(form)
+
+            form.instance.aplicar_desconto(form.desconto)
+            return super().form_valid(form)
+
+
+class ReservaCancelar(BaseLoginMixin, DonoMixin, UpdateView):
+    model = Reserva
+    fields = []
+    template_name = 'sobraNada/form.html'
+    success_url = reverse_lazy('reserva-list')
+    extra_context = {
+        'titulo': 'Cancelar Reserva',
+        'botao': 'Sim, cancelar reserva!',
+        'perigo': True,
+        'confirmacao': 'Deseja realmente cancelar',
+    }
+
+    def form_valid(self, form):
+        try:
+            self.object.cancelar()
+        except ValueError as erro:
+            messages.error(self.request, str(erro))
+        else:
+            messages.success(self.request, "Reserva cancelada e estoque devolvido.")
+        return redirect(self.success_url)
+
+
+class ReservaDelete(BaseLoginMixin, DonoMixin, DeleteView):
     model = Reserva
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('reserva-list')
@@ -385,26 +562,51 @@ class ReservaDelete(BaseLoginMixin, DeleteView):
         'botao': 'Sim, excluir!'
     }
 
+    def form_valid(self, form):
+        if self.object.esta_ativa:
+            self.object.sacola.devolver(self.object.quantity)
+        return super().form_valid(form)
+
+
 class ReservaList(BaseLoginMixin, ListView):
     model = Reserva
     template_name = 'sobraNada/list/reserva.html'
     paginate_by = 30
 
     def get_queryset(self):
-        return super().get_queryset().select_related('user', 'sacola')
+        usuario = self.request.user
+        return (
+            super().get_queryset()
+            .filter(Q(user=usuario) | Q(sacola__produtos__estabelecimento__user=usuario))
+            .select_related('user', 'sacola')
+            .distinct()
+        )
 
 class ReservaDetail(BaseLoginMixin, DetailView):
     model = Reserva
     template_name = 'sobraNada/detail/reserva.html'
+
+    def get_queryset(self):
+        usuario = self.request.user
+        return super().get_queryset().filter(
+            Q(user=usuario) | Q(sacola__produtos__estabelecimento__user=usuario)
+        ).distinct()
 
 
 # ─────────────────────────────────────────
 # AVALIAÇÃO
 # ─────────────────────────────────────────
 
-class AvaliacaoCreate(BaseLoginMixin, CreateView):
+class AvaliacaoFormKwargsMixin:
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs['usuario'] = self.request.user
+        return kwargs
+
+
+class AvaliacaoCreate(BaseLoginMixin, AvaliacaoFormKwargsMixin, CreateView):
     model = Avaliacao
-    fields = ['reserva', 'rating', 'comment']
+    form_class = AvaliacaoForm
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('avaliacao-list')
     extra_context = {
@@ -412,9 +614,10 @@ class AvaliacaoCreate(BaseLoginMixin, CreateView):
         'botao': 'Criar Avaliação'
     }
 
-class AvaliacaoUpdate(BaseLoginMixin, UpdateView):
+class AvaliacaoUpdate(BaseLoginMixin, DonoMixin, AvaliacaoFormKwargsMixin, UpdateView):
     model = Avaliacao
-    fields = ['reserva', 'rating', 'comment']
+    form_class = AvaliacaoForm
+    campo_dono = 'reserva__user'
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('avaliacao-list')
     extra_context = {
@@ -422,8 +625,9 @@ class AvaliacaoUpdate(BaseLoginMixin, UpdateView):
         'botao': 'Atualizar Avaliação'
     }
 
-class AvaliacaoDelete(BaseLoginMixin, DeleteView):
+class AvaliacaoDelete(BaseLoginMixin, DonoMixin, DeleteView):
     model = Avaliacao
+    campo_dono = 'reserva__user'
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('avaliacao-list')
     extra_context = {
@@ -450,7 +654,7 @@ class AvaliacaoDetail(BaseLoginMixin, DetailView):
 
 class NotificacaoCreate(BaseLoginMixin, CreateView):
     model = Notificacao
-    fields = ['user', 'title', 'message', 'type', 'is_read']
+    form_class = NotificacaoForm
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('notificacao-list')
     extra_context = {
@@ -458,9 +662,14 @@ class NotificacaoCreate(BaseLoginMixin, CreateView):
         'botao': 'Criar Notificação'
     }
 
-class NotificacaoUpdate(BaseLoginMixin, UpdateView):
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+
+class NotificacaoUpdate(BaseLoginMixin, DonoMixin, UpdateView):
     model = Notificacao
-    fields = ['user', 'title', 'message', 'type', 'is_read']
+    form_class = NotificacaoForm
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('notificacao-list')
     extra_context = {
@@ -468,7 +677,7 @@ class NotificacaoUpdate(BaseLoginMixin, UpdateView):
         'botao': 'Atualizar Notificação'
     }
 
-class NotificacaoDelete(BaseLoginMixin, DeleteView):
+class NotificacaoDelete(BaseLoginMixin, DonoMixin, DeleteView):
     model = Notificacao
     template_name = 'sobraNada/form.html'
     success_url = reverse_lazy('notificacao-list')
@@ -477,7 +686,7 @@ class NotificacaoDelete(BaseLoginMixin, DeleteView):
         'botao': 'Sim, excluir!'
     }
 
-class NotificacaoList(BaseLoginMixin, ListView):
+class NotificacaoList(BaseLoginMixin, DonoMixin, ListView):
     model = Notificacao
     template_name = 'sobraNada/list/notificacao.html'
     paginate_by = 30
@@ -485,6 +694,6 @@ class NotificacaoList(BaseLoginMixin, ListView):
     def get_queryset(self):
         return super().get_queryset().select_related('user')
 
-class NotificacaoDetail(BaseLoginMixin, DetailView):
+class NotificacaoDetail(BaseLoginMixin, DonoMixin, DetailView):
     model = Notificacao
     template_name = 'sobraNada/detail/notificacao.html'
