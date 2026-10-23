@@ -11,6 +11,7 @@ from .views import (
     ReservaCreate, ReservaUpdate, ReservaCancelar, ReservaDelete, ReservaList, ReservaDetail,
     AvaliacaoCreate, AvaliacaoUpdate, AvaliacaoDelete, AvaliacaoList, AvaliacaoDetail,
     NotificacaoCreate, NotificacaoUpdate, NotificacaoDelete, NotificacaoList, NotificacaoDetail,
+    carrinho_detail, carrinho_adicionar, carrinho_atualizar, carrinho_remover, carrinho_limpar,
 )
 
 urlpatterns = [
@@ -91,4 +92,11 @@ urlpatterns = [
     path('excluir/notificacao/<int:pk>/', NotificacaoDelete.as_view(), name='notificacao-delete'),
     path('listar/notificacao/', NotificacaoList.as_view(), name='notificacao-list'),
     path('detalhar/notificacao/<int:pk>/', NotificacaoDetail.as_view(), name='notificacao-detail'),
+
+    # Carrinho
+    path('carrinho/', carrinho_detail, name='carrinho-detail'),
+    path('carrinho/adicionar/<int:pk>/', carrinho_adicionar, name='carrinho-adicionar'),
+    path('carrinho/atualizar/<int:pk>/', carrinho_atualizar, name='carrinho-atualizar'),
+    path('carrinho/remover/<int:pk>/', carrinho_remover, name='carrinho-remover'),
+    path('carrinho/limpar/', carrinho_limpar, name='carrinho-limpar'),
 ]

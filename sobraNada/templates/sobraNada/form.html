@@ -18,18 +18,15 @@
                 {% if ajuda %}
                     <div class="alert alert-info small"><i class="bi bi-info-circle me-2"></i>{{ ajuda }}</div>
                 {% endif %}
-                <form method="post" enctype="multipart/form-data">
+                <form method="post" enctype="multipart/form-data" id="form-confirmacao">
                     {% csrf_token %}
                     {{ form|crispy }}
 
                     <div class="d-flex gap-2 mt-4">
                         {% if perigo or botao == "Sim, excluir!" %}
                             <div class="w-100">
-                                <div class="alert alert-danger mb-4 text-center">
-                                    <h5 class="alert-heading"><i class="bi bi-exclamation-triangle me-2"></i>Atenção!</h5>
-                                    <p class="mb-0">{{ confirmacao|default:"Deseja realmente excluir" }}: <strong>{{ object }}</strong>?</p>
-                                </div>
-                                <button type="submit" class="btn btn-danger w-100">
+                                <button type="button" id="btn-confirmar-exclusao" class="btn btn-danger w-100"
+                                        data-mensagem="{{ confirmacao|default:'Deseja realmente excluir' }}: {{ object }}?">
                                     <i class="bi bi-trash me-2"></i>{{ botao }}
                                 </button>
                             </div>
@@ -49,3 +46,26 @@
     </div>
 </div>
 {% endblock content %}
+
+{% block extra_js %}
+<script>
+  const btnConfirmarExclusao = document.getElementById('btn-confirmar-exclusao');
+  if (btnConfirmarExclusao) {
+    btnConfirmarExclusao.addEventListener('click', function () {
+      bootbox.confirm({
+        title: 'Atenção!',
+        message: btnConfirmarExclusao.dataset.mensagem,
+        buttons: {
+          confirm: { label: 'Sim, excluir!', className: 'btn-danger' },
+          cancel: { label: 'Cancelar', className: 'btn-outline-secondary' },
+        },
+        callback: function (confirmado) {
+          if (confirmado) {
+            document.getElementById('form-confirmacao').submit();
+          }
+        },
+      });
+    });
+  }
+</script>
+{% endblock extra_js %}

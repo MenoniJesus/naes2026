@@ -77,3 +77,58 @@ def calcular_desconto(*, preco_venda, quantidade: int) -> Desconto:
         valor_final=valor_final,
         preco_unitario=arredondar(valor_final / quantidade),
     )
+
+
+# Desconto por faixa de valor do carrinho de produtos.
+#
+# Faixas sobre o valor total do carrinho (soma de preco x quantidade de cada item):
+#
+#     ate R$ 149,99           ->   0%
+#     R$ 150,00 a R$ 249,99   ->  20%
+#     R$ 250,00 a R$ 499,99   ->  25%
+#     a partir de R$ 500,00   ->  35%
+
+FAIXAS_CARRINHO = (
+    (Decimal("500.00"), Decimal("0.35")),
+    (Decimal("250.00"), Decimal("0.25")),
+    (Decimal("150.00"), Decimal("0.20")),
+)
+
+
+@dataclass(frozen=True)
+class DescontoCarrinho:
+    valor_bruto: Decimal
+    percentual: Decimal
+    valor_desconto: Decimal
+    valor_final: Decimal
+
+    @property
+    def percentual_exibicao(self) -> Decimal:
+        """Percentual em base 100, pronto para a tela (ex.: 20.00)."""
+        return arredondar(self.percentual * 100)
+
+    @property
+    def tem_desconto(self) -> bool:
+        return self.percentual > 0
+
+
+def percentual_por_valor_carrinho(valor) -> Decimal:
+    valor = Decimal(valor)
+    for minimo, percentual in FAIXAS_CARRINHO:
+        if valor >= minimo:
+            return percentual
+    return Decimal("0.00")
+
+
+def calcular_desconto_carrinho(valor_bruto) -> DescontoCarrinho:
+    valor_bruto = arredondar(valor_bruto)
+    percentual = percentual_por_valor_carrinho(valor_bruto)
+    valor_desconto = arredondar(valor_bruto * percentual)
+    valor_final = valor_bruto - valor_desconto
+
+    return DescontoCarrinho(
+        valor_bruto=valor_bruto,
+        percentual=percentual,
+        valor_desconto=valor_desconto,
+        valor_final=valor_final,
+    )

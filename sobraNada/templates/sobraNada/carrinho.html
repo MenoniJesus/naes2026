@@ -1,0 +1,98 @@
+{% extends "website/modelo2.html" %}
+{% block breadcrumb %}<li class="breadcrumb-item active">Carrinho</li>{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0"><i class="bi bi-cart3 me-2"></i>Carrinho</h2>
+  {% if itens %}
+  <form method="post" action="{% url 'carrinho-limpar' %}">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-outline-danger btn-sm">
+      <i class="bi bi-trash me-1"></i>Esvaziar carrinho
+    </button>
+  </form>
+  {% endif %}
+</div>
+
+{% if not itens %}
+<div class="card shadow-sm">
+  <div class="card-body p-5 text-center text-muted">
+    <i class="bi bi-cart-x fs-1 d-block mb-3"></i>
+    Seu carrinho está vazio.
+    <div class="mt-3">
+      <a href="{% url 'produto-list' %}" class="btn btn-primary">Ver produtos</a>
+    </div>
+  </div>
+</div>
+{% else %}
+<div class="card shadow-sm">
+  <div class="card-body p-4">
+    <table class="table align-middle mb-0">
+      <thead>
+        <tr>
+          <th>Produto</th>
+          <th>Estabelecimento</th>
+          <th>Preço unit.</th>
+          <th style="width: 160px;">Quantidade</th>
+          <th class="text-end">Subtotal</th>
+          <th class="text-center">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in itens %}
+        <tr>
+          <td>{{ item.produto.name }}</td>
+          <td>{{ item.produto.estabelecimento }}</td>
+          <td>R$ {{ item.produto.price }}</td>
+          <td>
+            <form method="post" action="{% url 'carrinho-atualizar' item.produto.pk %}" class="d-flex gap-2">
+              {% csrf_token %}
+              <input type="number" name="quantidade" value="{{ item.quantidade }}" min="1"
+                     class="form-control form-control-sm" style="width: 70px;">
+              <button type="submit" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-arrow-repeat"></i>
+              </button>
+            </form>
+          </td>
+          <td class="text-end">R$ {{ item.subtotal }}</td>
+          <td class="text-center">
+            <form method="post" action="{% url 'carrinho-remover' item.produto.pk %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="row justify-content-end mt-4">
+  <div class="col-md-5">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <h5 class="mb-3">Resumo</h5>
+        <div class="d-flex justify-content-between">
+          <span>Subtotal</span>
+          <span>R$ {{ desconto.valor_bruto }}</span>
+        </div>
+        <div class="d-flex justify-content-between">
+          <span>Desconto ({{ desconto.percentual_exibicao }}%)</span>
+          <span class="{% if desconto.tem_desconto %}text-success{% endif %}">
+            - R$ {{ desconto.valor_desconto }}
+          </span>
+        </div>
+        <hr>
+        <div class="d-flex justify-content-between fw-bold fs-5">
+          <span>Total</span>
+          <span>R$ {{ desconto.valor_final }}</span>
+        </div>
+        <p class="text-muted small mt-3 mb-0">{{ ajuda }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

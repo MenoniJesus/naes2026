@@ -1,18 +1,23 @@
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Q
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.views.decorators.http import require_POST
 from django.views.generic import CreateView, UpdateView, DeleteView
 from django.views.generic.detail import DetailView
 from django.views.generic.list import ListView
 
 from braces.views import GroupRequiredMixin
 
+from .carrinho import Carrinho
+from .filters import ProdutoFilter, ReservaFilter, SacolaFilter
 from .forms import (
     AvaliacaoForm, EstabelecimentoForm, NotificacaoForm, PerfilForm,
     ProdutoForm, ReservaForm, ReservaUpdateForm, SacolaForm, SacolaUpdateForm,
+
 )
 from .models import (
     Estado, Cidade, Endereco, Perfil,
@@ -29,6 +34,12 @@ AJUDA_DESCONTO = (
     "Desconto por faixa do total da reserva (preço da sacola x quantidade): "
     "até R$ 100,00 sem desconto · R$ 100,01 a 250,00: 10% · "
     "R$ 250,01 a 500,00: 20% · R$ 500,01 a 1.000,00: 25% · acima de R$ 1.000,00: 30%."
+)
+
+AJUDA_DESCONTO_CARRINHO = (
+    "Desconto por faixa do total do carrinho: "
+    "até R$ 149,99 sem desconto · R$ 150,00 a 249,99: 20% · "
+    "R$ 250,00 a 499,99: 25% · a partir de R$ 500,00: 35%."
 )
 
 
@@ -388,7 +399,14 @@ class ProdutoList(BaseLoginMixin, ListView):
     paginate_by = 30
 
     def get_queryset(self):
-        return super().get_queryset().select_related('estabelecimento')
+        queryset = super().get_queryset().select_related('estabelecimento')
+        self.filterset = ProdutoFilter(self.request.GET, queryset=queryset)
+        return self.filterset.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.filterset
+        return context
 
 class ProdutoDetail(BaseLoginMixin, DetailView):
     model = Produto
@@ -444,7 +462,14 @@ class SacolaList(BaseLoginMixin, ListView):
     paginate_by = 30
 
     def get_queryset(self):
-        return super().get_queryset().prefetch_related('produtos__estabelecimento')
+        queryset = super().get_queryset().prefetch_related('produtos__estabelecimento')
+        self.filterset = SacolaFilter(self.request.GET, queryset=queryset)
+        return self.filterset.qs.distinct()
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.filterset
+        return context
 
 class SacolaDetail(BaseLoginMixin, DetailView):
     model = Sacola
@@ -575,12 +600,19 @@ class ReservaList(BaseLoginMixin, ListView):
 
     def get_queryset(self):
         usuario = self.request.user
-        return (
+        queryset = (
             super().get_queryset()
             .filter(Q(user=usuario) | Q(sacola__produtos__estabelecimento__user=usuario))
             .select_related('user', 'sacola')
             .distinct()
         )
+        self.filterset = ReservaFilter(self.request.GET, queryset=queryset)
+        return self.filterset.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter'] = self.filterset
+        return context
 
 class ReservaDetail(BaseLoginMixin, DetailView):
     model = Reserva
@@ -697,3 +729,58 @@ class NotificacaoList(BaseLoginMixin, DonoMixin, ListView):
 class NotificacaoDetail(BaseLoginMixin, DonoMixin, DetailView):
     model = Notificacao
     template_name = 'sobraNada/detail/notificacao.html'
+
+
+# ─────────────────────────────────────────
+# CARRINHO
+# ─────────────────────────────────────────
+
+@login_required
+def carrinho_detail(request):
+    itens, desconto = Carrinho(request).calcular()
+    return render(request, 'sobraNada/carrinho.html', {
+        'itens': itens,
+        'desconto': desconto,
+        'ajuda': AJUDA_DESCONTO_CARRINHO,
+    })
+
+
+@login_required
+@require_POST
+def carrinho_adicionar(request, pk):
+    produto = get_object_or_404(Produto, pk=pk, is_active=True)
+    try:
+        quantidade = int(request.POST.get('quantidade', 1))
+    except ValueError:
+        quantidade = 1
+    quantidade = max(quantidade, 1)
+
+    Carrinho(request).adicionar(produto, quantidade)
+    messages.success(request, f'"{produto.name}" adicionado ao carrinho.')
+    return redirect('carrinho-detail')
+
+
+@login_required
+@require_POST
+def carrinho_atualizar(request, pk):
+    try:
+        quantidade = int(request.POST.get('quantidade', 1))
+    except ValueError:
+        quantidade = 1
+
+    Carrinho(request).atualizar(pk, quantidade)
+    return redirect('carrinho-detail')
+
+
+@login_required
+@require_POST
+def carrinho_remover(request, pk):
+    Carrinho(request).remover(pk)
+    return redirect('carrinho-detail')
+
+
+@login_required
+@require_POST
+def carrinho_limpar(request):
+    Carrinho(request).limpar()
+    return redirect('carrinho-detail')

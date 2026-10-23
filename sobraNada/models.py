@@ -195,8 +195,9 @@ class Sacola(models.Model):
         """Vem dos produtos: o form garante que todos sejam do mesmo estabelecimento."""
         if not self.pk:
             return None
-        primeiro = self.produtos.first()
-        return primeiro.estabelecimento if primeiro else None
+        # list(...all()) em vez de .first() para aproveitar o cache do prefetch_related.
+        produtos = list(self.produtos.all())
+        return produtos[0].estabelecimento if produtos else None
 
     def save(self, *args, **kwargs):
         if self._state.adding and self.available_quantity is None:
