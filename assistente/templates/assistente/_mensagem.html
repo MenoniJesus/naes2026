@@ -1,0 +1,17 @@
+{% load markdown_seguro %}
+{% if mensagem.papel == 'user' %}
+<div class="chat-linha chat-linha-usuario">
+  <div class="chat-balao chat-balao-usuario">
+    {{ mensagem.conteudo|linebreaksbr }}
+    <div class="chat-hora">{{ mensagem.criado_em|date:"d/m H:i" }}</div>
+  </div>
+</div>
+{% else %}
+<div class="chat-linha">
+  <div class="chat-avatar"><i class="bi bi-robot"></i></div>
+  <div class="chat-balao chat-balao-assistente chat-markdown">
+    {{ mensagem.conteudo|markdown_seguro }}
+    <div class="chat-hora">{{ mensagem.criado_em|date:"d/m H:i" }}</div>
+  </div>
+</div>
+{% endif %}

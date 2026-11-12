@@ -1,0 +1,8 @@
+{% load humanize_ia %}
+<div class="d-flex justify-content-between small mb-1">
+  <span>{{ situacao.consumo|milhar }} de {{ situacao.cota|milhar }} tokens</span>
+  <span class="fw-semibold">{{ situacao.percentual }}%</span>
+</div>
+<div class="progress" role="progressbar" aria-label="Consumo da cota mensal" aria-valuenow="{{ situacao.percentual }}" aria-valuemin="0" aria-valuemax="100" style="height: .6rem;">
+  <div class="progress-bar {% if situacao.percentual >= 90 %}bg-danger{% elif situacao.percentual >= 70 %}bg-warning{% else %}bg-success{% endif %}" style="width: {{ situacao.percentual }}%"></div>
+</div>

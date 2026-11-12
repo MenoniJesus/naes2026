@@ -1,0 +1,15 @@
+{% extends 'website/base.html' %}
+
+{% block title %}Sessão expirada | SobraNada{% endblock %}
+
+{% block content %}
+<section class="section">
+    <div class="container auth-box">
+        <h1>Não foi possível enviar o formulário</h1>
+        <p>Por segurança, o formulário precisa ser carregado de novo. Isso acontece quando a página
+        ficou aberta por muito tempo ou depois de uma atualização do site.</p>
+        <p>Recarregue a página e tente de novo. Se continuar, apague os cookies deste site no navegador.</p>
+        <p><a class="btn" href="{% url 'login' %}">Voltar ao login</a></p>
+    </div>
+</section>
+{% endblock %}

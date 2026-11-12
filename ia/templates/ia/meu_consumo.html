@@ -1,0 +1,78 @@
+{% extends "website/modelo2.html" %}
+{% load humanize_ia %}
+{% block title %}Meu consumo de IA | SobraNada{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active">IA · Meu consumo</li>{% endblock %}
+{% block content %}
+{% include "ia/_abas.html" %}
+<h2 class="mb-4">Meu consumo de IA</h2>
+<div class="row g-3 mb-4">
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100"><div class="card-body">
+      <div class="text-muted small">Usado em {% now "F/Y" %}</div>
+      <div class="fs-3 fw-semibold">{{ situacao.consumo|milhar }}</div>
+      <div class="small text-muted">tokens</div>
+    </div></div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100"><div class="card-body">
+      <div class="text-muted small">Restante no mês</div>
+      <div class="fs-3 fw-semibold">{{ situacao.restante|milhar }}</div>
+      <div class="small text-muted">de {{ situacao.cota|milhar }} tokens</div>
+    </div></div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm h-100"><div class="card-body">
+      <div class="text-muted small">Acesso</div>
+      {% if situacao.habilitado %}
+        <div class="fs-5 fw-semibold text-success"><i class="bi bi-check-circle me-1"></i>Liberado</div>
+      {% else %}
+        <div class="fs-5 fw-semibold text-secondary"><i class="bi bi-slash-circle me-1"></i>Bloqueado</div>
+        <div class="small text-muted">Fale com um administrador.</div>
+      {% endif %}
+    </div></div>
+  </div>
+</div>
+<div class="card shadow-sm mb-4"><div class="card-body">
+  {% include "ia/_barra_consumo.html" %}
+  <div class="small text-muted mt-2">A cota é renovada no primeiro dia de cada mês.</div>
+</div></div>
+
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-white fw-semibold"><i class="bi bi-calendar3 me-2"></i>Últimos meses</div>
+      <ul class="list-group list-group-flush">
+        {% for linha in por_mes %}
+        <li class="list-group-item d-flex justify-content-between">
+          <span>{{ linha.mes|date:"F/Y" }}</span>
+          <span><strong>{{ linha.tokens|milhar }}</strong> <span class="text-muted small">tokens · {{ linha.chamadas }} chamada{{ linha.chamadas|pluralize }}</span></span>
+        </li>
+        {% empty %}
+        <li class="list-group-item text-muted">Você ainda não usou a IA.</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold"><i class="bi bi-clock-history me-2"></i>Minhas requisições</div>
+      <div class="card-body p-4">
+        <table class="table mb-0 align-middle">
+          <thead><tr><th>Data</th><th>Pergunta</th><th>Tokens</th><th>Status</th></tr></thead>
+          <tbody>
+            {% for obj in object_list %}
+            <tr>
+              <td class="text-nowrap">{{ obj.criado_em|date:"d/m H:i" }}</td>
+              <td>{{ obj.pergunta|truncatechars:70 }}</td>
+              <td>{{ obj.tokens_total|milhar }}</td>
+              <td>{% include "ia/_status.html" with status=obj.status %}</td>
+            </tr>
+            {% empty %}<tr><td colspan="4" class="text-center text-muted py-4">Nenhuma requisição ainda. <a href="{% url 'assistente' %}">Pergunte ao assistente</a>.</td></tr>{% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% include "sobraNada/includes/pagination.html" %}
+  </div>
+</div>
+{% endblock %}

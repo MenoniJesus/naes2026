@@ -1,4 +1,4 @@
-from django.urls import include, path
+from django.urls import include, path, reverse_lazy
 
 from .views import ContatoView, HubView, IndexView, RegisterView
 
@@ -18,10 +18,14 @@ urlpatterns = [
     path("login/", LoginView.as_view(
         template_name="sobraNada/form.html",
         extra_context={
-            'title': 'Login', 
+            'titulo': 'Login',
             'botao': 'Entrar'
             }
     ), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
-    path("mudar-senha/", PasswordChangeView.as_view(template_name="sobraNada/form.html"), name="password_change"),
+    path("mudar-senha/", PasswordChangeView.as_view(
+        template_name="sobraNada/form.html",
+        success_url=reverse_lazy("hub"),
+        extra_context={'titulo': 'Alterar senha', 'botao': 'Salvar nova senha'},
+    ), name="password_change"),
 ]

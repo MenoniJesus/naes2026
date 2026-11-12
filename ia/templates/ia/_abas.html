@@ -1,0 +1,21 @@
+{% with rota=request.resolver_match.url_name %}
+<ul class="nav nav-pills mb-4 gap-1">
+  <li class="nav-item">
+    <a class="nav-link {% if rota == 'assistente' %}active{% endif %}" href="{% url 'assistente' %}"><i class="bi bi-chat-dots me-1"></i>Assistente</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if rota == 'ia-meu-consumo' %}active{% endif %}" href="{% url 'ia-meu-consumo' %}"><i class="bi bi-speedometer2 me-1"></i>Meu consumo</a>
+  </li>
+  {% if usuario_admin %}
+  <li class="nav-item">
+    <a class="nav-link {% if rota == 'ia-requisicao-list' or rota == 'ia-requisicao-detail' %}active{% endif %}" href="{% url 'ia-requisicao-list' %}"><i class="bi bi-journal-text me-1"></i>Requisições</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if rota == 'ia-usuario-list' or rota == 'ia-usuario-update' %}active{% endif %}" href="{% url 'ia-usuario-list' %}"><i class="bi bi-people me-1"></i>IA por usuário</a>
+  </li>
+  <li class="nav-item">
+    <a class="nav-link {% if rota == 'ia-configuracao' %}active{% endif %}" href="{% url 'ia-configuracao' %}"><i class="bi bi-gear me-1"></i>Configuração</a>
+  </li>
+  {% endif %}
+</ul>
+{% endwith %}

@@ -1,0 +1,53 @@
+{% extends "website/modelo2.html" %}
+{% load crispy_forms_tags humanize_ia %}
+{% block title %}Requisições de IA | SobraNada{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active">IA · Requisições</li>{% endblock %}
+{% block content %}
+{% include "ia/_abas.html" %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <div>
+    <h2 class="mb-0">Requisições de IA</h2>
+    <p class="text-muted mb-0 small">Auditoria de todas as chamadas feitas por <code>chamar_ia</code>.</p>
+  </div>
+  <div class="text-end">
+    <div class="small text-muted">Tokens no filtro atual</div>
+    <div class="fs-5 fw-semibold">{{ tokens_filtrados|milhar }}</div>
+  </div>
+</div>
+<div class="card shadow-sm mb-4">
+  <div class="card-body p-4">
+    <form method="get" class="row row-cols-lg-auto g-3 align-items-end">
+      {{ filter.form|crispy }}
+      <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-primary"><i class="bi bi-funnel"></i> Filtrar</button>
+        <a href="{% url 'ia-requisicao-list' %}" class="btn btn-outline-secondary">Limpar</a>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="card shadow-sm">
+  <div class="card-body p-4">
+    <table class="table table-datatable mb-0 align-middle">
+      <thead><tr><th>ID</th><th>Data</th><th>Usuário</th><th>Origem</th><th>Modelo</th><th>Tokens</th><th>Tempo</th><th>Status</th><th class="text-center">Ações</th></tr></thead>
+      <tbody>
+        {% for obj in object_list %}
+        <tr>
+          <td>{{ obj.pk }}</td>
+          <td data-order="{{ obj.criado_em|date:'U' }}">{{ obj.criado_em|date:"d/m/Y H:i" }}</td>
+          <td>{{ obj.user|default:"—" }}</td>
+          <td><code>{{ obj.origem }}</code></td>
+          <td class="small">{{ obj.modelo }}</td>
+          <td>{{ obj.tokens_total|milhar }}</td>
+          <td>{{ obj.duracao_ms|milhar }} ms</td>
+          <td>{% include "ia/_status.html" with status=obj.status %}</td>
+          <td class="text-center">
+            <a href="{% url 'ia-requisicao-detail' obj.pk %}" class="btn btn-sm btn-outline-secondary" title="Detalhes"><i class="bi bi-eye"></i></a>
+          </td>
+        </tr>
+        {% empty %}<tr><td colspan="9" class="text-center text-muted py-4">Nenhuma requisição registrada.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include "sobraNada/includes/pagination.html" %}
+{% endblock %}

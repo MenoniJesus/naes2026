@@ -15,6 +15,7 @@ from urllib.parse import urlparse, parse_qsl
 
 from pathlib import Path
 from dotenv import load_dotenv
+from django.contrib.messages import constants as message_constants
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -47,6 +48,8 @@ INSTALLED_APPS = [
     # Ativar meu apps
     "website.apps.WebsiteConfig",
     "sobraNada.apps.SobranadaConfig",
+    "ia.apps.IaConfig",
+    "assistente.apps.AssistenteConfig",
 
     # Crispy
     'crispy_forms',
@@ -83,6 +86,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'ia.context_processors.ia',
             ],
         },
     },
@@ -96,17 +100,26 @@ WSGI_APPLICATION = 'DjangoProject.wsgi.application'
 
 tmpPostgres = urlparse(os.environ['DATABASE_URL'])
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': tmpPostgres.path.replace('/', ''),
-        'USER': tmpPostgres.username,
-        'PASSWORD': tmpPostgres.password,
-        'HOST': tmpPostgres.hostname,
-        'PORT': 5432,
-        'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
+if tmpPostgres.scheme == 'sqlite':
+    # Usado nos testes locais: DATABASE_URL=sqlite:///db.sqlite3
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / (tmpPostgres.path.lstrip('/') or 'db.sqlite3'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': tmpPostgres.path.replace('/', ''),
+            'USER': tmpPostgres.username,
+            'PASSWORD': tmpPostgres.password,
+            'HOST': tmpPostgres.hostname,
+            'PORT': 5432,
+            'OPTIONS': dict(parse_qsl(tmpPostgres.query)),
+        }
+    }
 
 
 # Password validation
@@ -159,3 +172,31 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'hub'
 LOGOUT_REDIRECT_URL = 'index'
+
+# Bootstrap usa "danger" em vez de "error"
+MESSAGE_TAGS = {message_constants.ERROR: 'danger'}
+
+# IA: a chave pode vir do ambiente ou da tela de configuração (app ia)
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
+
+if not DEBUG:
+    # O App Engine termina o HTTPS no proxy e avisa via X-Forwarded-Proto;
+    # sem isso a checagem de Origin do CSRF falha nos POSTs.
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
+CSRF_FAILURE_VIEW = 'website.views.csrf_falhou'
+
+# Avisos (CSRF recusado, erros 500) vão para o stderr, que aparece em `gcloud app logs`.
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {'console': {'class': 'logging.StreamHandler'}},
+    'loggers': {
+        'django.request': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        'django.security': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        'sobranada': {'handlers': ['console'], 'level': 'INFO', 'propagate': False},
+    },
+}
+

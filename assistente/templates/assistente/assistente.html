@@ -1,0 +1,209 @@
+{% extends "website/modelo2.html" %}
+{% block title %}Assistente | SobraNada{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active">IA · Assistente</li>{% endblock %}
+
+{% block extra_css %}
+<style>
+  .chat-historico { height: 60vh; min-height: 320px; overflow-y: auto; background: #f8f9fa; }
+  .chat-linha { display: flex; gap: .5rem; margin-bottom: 1rem; align-items: flex-start; }
+  .chat-linha-usuario { justify-content: flex-end; }
+  .chat-avatar { flex: 0 0 2.25rem; height: 2.25rem; border-radius: 50%; background: #212529; color: #fff;
+                 display: flex; align-items: center; justify-content: center; }
+  .chat-balao { max-width: 80%; padding: .65rem .9rem; border-radius: 1rem; box-shadow: 0 1px 2px rgba(0,0,0,.06);
+                overflow-wrap: anywhere; }
+  .chat-balao-usuario { background: #0d6efd; color: #fff; border-bottom-right-radius: .25rem; }
+  .chat-balao-assistente { background: #fff; border-bottom-left-radius: .25rem; }
+  .chat-hora { font-size: .7rem; opacity: .6; margin-top: .25rem; text-align: right; }
+  .chat-markdown p:last-of-type { margin-bottom: 0; }
+  .chat-markdown ul, .chat-markdown ol { padding-left: 1.25rem; margin-bottom: .5rem; }
+  .chat-markdown pre { background: #f1f3f5; padding: .5rem; border-radius: .5rem; }
+  .chat-markdown table { width: 100%; margin-bottom: .5rem; font-size: .9rem; }
+  .chat-markdown th, .chat-markdown td { border: 1px solid #dee2e6; padding: .25rem .5rem; }
+  .chat-vazio { color: #6c757d; text-align: center; margin-top: 18%; }
+  .chat-digitando span { display: inline-block; width: .45rem; height: .45rem; margin: 0 .1rem; border-radius: 50%;
+                         background: #adb5bd; animation: chat-pulo 1.2s infinite ease-in-out; }
+  .chat-digitando span:nth-child(2) { animation-delay: .15s; }
+  .chat-digitando span:nth-child(3) { animation-delay: .3s; }
+  @keyframes chat-pulo { 0%, 80%, 100% { transform: scale(.6); opacity: .5; } 40% { transform: scale(1); opacity: 1; } }
+  .sugestao { cursor: pointer; text-align: left; }
+</style>
+{% endblock %}
+
+{% block content %}
+{% include "ia/_abas.html" %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-dark text-white py-3 d-flex align-items-center justify-content-between">
+        <h4 class="mb-0 fs-5"><i class="bi bi-chat-dots me-2"></i>Assistente SobraNada</h4>
+        {% if historico %}
+        <form method="post" action="{% url 'assistente-limpar' %}" id="form-limpar" class="mb-0">
+          {% csrf_token %}
+          <button type="button" class="btn btn-sm btn-outline-light" id="btn-limpar"><i class="bi bi-trash me-1"></i>Limpar conversa</button>
+        </form>
+        {% endif %}
+      </div>
+      <div class="card-body chat-historico p-3" id="chat-historico" aria-live="polite">
+        {% for mensagem in historico %}
+          {% include "assistente/_mensagem.html" %}
+        {% empty %}
+          <div class="chat-vazio" id="chat-vazio">
+            <i class="bi bi-robot fs-1 d-block mb-2"></i>
+            Olá, {{ user.username }}! Pergunte como usar o SobraNada.
+          </div>
+        {% endfor %}
+      </div>
+      <div class="card-footer bg-white p-3">
+        <form id="form-pergunta" action="{% url 'assistente-perguntar' %}" method="post">
+          {% csrf_token %}
+          <div class="input-group">
+            <textarea class="form-control" id="campo-pergunta" name="pergunta" rows="2"
+                      maxlength="{{ tamanho_maximo }}" placeholder="Digite sua pergunta... (Enter envia, Shift+Enter quebra linha)"
+                      aria-label="Pergunta" {% if not situacao.habilitado %}disabled{% endif %}></textarea>
+            <button class="btn btn-primary px-4" type="submit" id="btn-enviar" {% if not situacao.habilitado %}disabled{% endif %}>
+              <i class="bi bi-send"></i><span class="d-none d-sm-inline ms-2">Enviar</span>
+            </button>
+          </div>
+          <div class="d-flex justify-content-between small text-muted mt-1">
+            <span>O assistente considera as últimas {{ janela }} mensagens da conversa.</span>
+            <span id="contador">0/{{ tamanho_maximo }}</span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-4">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold"><i class="bi bi-speedometer2 me-2"></i>Sua cota de {% now "F" %}</div>
+      <div class="card-body" id="cota">
+        {% if situacao.habilitado %}
+          {% include "ia/_barra_consumo.html" %}
+          <a href="{% url 'ia-meu-consumo' %}" class="small d-inline-block mt-2">Ver detalhes do consumo</a>
+        {% else %}
+          <div class="text-secondary"><i class="bi bi-slash-circle me-1"></i>Seu acesso à IA está bloqueado. Fale com um administrador.</div>
+        {% endif %}
+      </div>
+    </div>
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold"><i class="bi bi-lightbulb me-2"></i>Sugestões</div>
+      <div class="list-group list-group-flush">
+        {% for sugestao in sugestoes %}
+        <button type="button" class="list-group-item list-group-item-action sugestao small">{{ sugestao }}</button>
+        {% endfor %}
+      </div>
+      <div class="card-footer bg-light small text-muted">
+        O assistente explica como usar o sistema. Ele não vê seus dados nem executa ações.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $(function () {
+    const $historico = $('#chat-historico');
+    const $form = $('#form-pergunta');
+    const $campo = $('#campo-pergunta');
+    const $botao = $('#btn-enviar');
+    const csrfToken = $form.find('input[name=csrfmiddlewaretoken]').val();
+    const maximo = parseInt($campo.attr('maxlength'), 10);
+
+    function rolarParaBaixo() {
+      $historico.scrollTop($historico[0].scrollHeight);
+    }
+
+    function textoSeguro(texto) {
+      return $('<div>').text(texto).html();
+    }
+
+    function atualizarCota(situacao) {
+      const cor = situacao.percentual >= 90 ? 'bg-danger' : (situacao.percentual >= 70 ? 'bg-warning' : 'bg-success');
+      const milhar = (n) => n.toLocaleString('pt-BR');
+      $('#cota .progress-bar').attr('class', 'progress-bar ' + cor).css('width', situacao.percentual + '%');
+      $('#cota .progress').attr('aria-valuenow', situacao.percentual);
+      $('#cota .d-flex span:first').text(milhar(situacao.consumo) + ' de ' + milhar(situacao.cota) + ' tokens');
+      $('#cota .d-flex span:last').text(situacao.percentual + '%');
+    }
+
+    function enviar() {
+      const pergunta = $campo.val().trim();
+      if (!pergunta || $botao.prop('disabled')) return;
+
+      $('#chat-vazio').remove();
+      // Mostra a pergunta e o "digitando" enquanto a IA responde; o servidor devolve o HTML definitivo.
+      const $pendente = $(
+        '<div class="chat-pendente">' +
+          '<div class="chat-linha chat-linha-usuario"><div class="chat-balao chat-balao-usuario">' +
+            textoSeguro(pergunta).replace(/\n/g, '<br>') + '</div></div>' +
+          '<div class="chat-linha"><div class="chat-avatar"><i class="bi bi-robot"></i></div>' +
+            '<div class="chat-balao chat-balao-assistente chat-digitando" aria-label="Assistente digitando">' +
+            '<span></span><span></span><span></span></div></div>' +
+        '</div>'
+      );
+      $historico.append($pendente);
+      rolarParaBaixo();
+      $campo.val('').trigger('input').prop('disabled', true);
+      $botao.prop('disabled', true);
+
+      $.ajax({
+        url: $form.attr('action'),
+        method: 'POST',
+        data: { pergunta: pergunta },
+        headers: { 'X-CSRFToken': csrfToken },
+        dataType: 'json',
+      }).done(function (dados) {
+        $pendente.replaceWith(dados.html);
+        atualizarCota(dados.situacao);
+      }).fail(function (xhr) {
+        const erro = (xhr.responseJSON && xhr.responseJSON.erro) || 'Não foi possível falar com o assistente. Tente novamente.';
+        $pendente.find('.chat-digitando').closest('.chat-linha').remove();
+        $pendente.append(
+          '<div class="alert alert-danger py-2 small mb-3"><i class="bi bi-exclamation-triangle me-2"></i>' +
+          textoSeguro(erro) + '</div>'
+        );
+        $campo.val(pergunta).trigger('input');
+      }).always(function () {
+        $campo.prop('disabled', false).trigger('focus');
+        $botao.prop('disabled', false);
+        rolarParaBaixo();
+      });
+    }
+
+    $form.on('submit', function (evento) {
+      evento.preventDefault();
+      enviar();
+    });
+
+    $campo.on('keydown', function (evento) {
+      if (evento.key === 'Enter' && !evento.shiftKey) {
+        evento.preventDefault();
+        enviar();
+      }
+    }).on('input', function () {
+      $('#contador').text($campo.val().length + '/' + maximo);
+    });
+
+    $('.sugestao').on('click', function () {
+      $campo.val($(this).text().trim()).trigger('input').trigger('focus');
+    });
+
+    $('#btn-limpar').on('click', function () {
+      bootbox.confirm({
+        title: 'Limpar conversa',
+        message: 'Apagar todo o histórico da conversa com o assistente?',
+        buttons: {
+          confirm: { label: 'Sim, apagar', className: 'btn-danger' },
+          cancel: { label: 'Cancelar', className: 'btn-outline-secondary' },
+        },
+        callback: function (confirmado) {
+          if (confirmado) $('#form-limpar').submit();
+        },
+      });
+    });
+
+    rolarParaBaixo();
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "website/modelo2.html" %}
+{% load humanize_ia %}
+{% block title %}Requisição #{{ object.pk }} | SobraNada{% endblock %}
+{% block breadcrumb %}
+<li class="breadcrumb-item"><a href="{% url 'ia-requisicao-list' %}">IA · Requisições</a></li>
+<li class="breadcrumb-item active">#{{ object.pk }}</li>
+{% endblock %}
+{% block content %}
+{% include "ia/_abas.html" %}
+<div class="row g-4">
+  <div class="col-lg-4">
+    <div class="card shadow-sm h-100">
+      <div class="card-header bg-white fw-semibold">Requisição #{{ object.pk }}</div>
+      <ul class="list-group list-group-flush small">
+        <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Status</span>{% include "ia/_status.html" with status=object.status %}</li>
+        <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Data</span>{{ object.criado_em|date:"d/m/Y H:i:s" }}</li>
+        <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Usuário</span>{{ object.user|default:"—" }}</li>
+        <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Origem</span><code>{{ object.origem }}</code></li>
+        <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Modelo</span>{{ object.modelo }}</li>
+        <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Mensagens enviadas</span>{{ object.mensagens_enviadas }}</li>
+        <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Tokens de entrada</span>{{ object.tokens_entrada|milhar }}</li>
+        <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Tokens de saída</span>{{ object.tokens_saida|milhar }}</li>
+        <li class="list-group-item d-flex justify-content-between"><span class="text-muted">Duração</span>{{ object.duracao_ms|milhar }} ms</li>
+        {% if object.id_requisicao_api %}
+        <li class="list-group-item"><span class="text-muted d-block">ID na API</span><code class="small">{{ object.id_requisicao_api }}</code></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+  <div class="col-lg-8">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold"><i class="bi bi-person me-2"></i>Pergunta</div>
+      <div class="card-body"><p class="mb-0" style="white-space: pre-wrap;">{{ object.pergunta|default:"—" }}</p></div>
+    </div>
+    {% if object.resposta %}
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-white fw-semibold"><i class="bi bi-robot me-2"></i>Resposta</div>
+      <div class="card-body"><p class="mb-0" style="white-space: pre-wrap;">{{ object.resposta }}</p></div>
+    </div>
+    {% endif %}
+    {% if object.erro %}
+    <div class="alert alert-danger mb-0"><i class="bi bi-exclamation-triangle me-2"></i>{{ object.erro }}</div>
+    {% endif %}
+  </div>
+</div>
+<a href="{% url 'ia-requisicao-list' %}" class="btn btn-outline-secondary mt-4"><i class="bi bi-arrow-left me-2"></i>Voltar</a>
+{% endblock %}

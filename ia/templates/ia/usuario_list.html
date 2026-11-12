@@ -1,0 +1,45 @@
+{% extends "website/modelo2.html" %}
+{% load crispy_forms_tags humanize_ia %}
+{% block title %}IA por usuário | SobraNada{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active">IA · Por usuário</li>{% endblock %}
+{% block content %}
+{% include "ia/_abas.html" %}
+<div class="mb-4">
+  <h2 class="mb-0">IA por usuário</h2>
+  <p class="text-muted mb-0 small">Consumo de {% now "F/Y" %}. Cota padrão: {{ configuracao.cota_mensal_padrao|milhar }} tokens.</p>
+</div>
+<div class="card shadow-sm mb-4">
+  <div class="card-body p-4">
+    <form method="get" class="row row-cols-lg-auto g-3 align-items-end">
+      {{ filter.form|crispy }}
+      <div class="col-12 d-flex gap-2">
+        <button type="submit" class="btn btn-outline-primary"><i class="bi bi-funnel"></i> Filtrar</button>
+        <a href="{% url 'ia-usuario-list' %}" class="btn btn-outline-secondary">Limpar</a>
+      </div>
+    </form>
+  </div>
+</div>
+<div class="card shadow-sm">
+  <div class="card-body p-4">
+    <table class="table table-datatable mb-0 align-middle">
+      <thead><tr><th>Usuário</th><th>Acesso</th><th>Cota mensal</th><th style="min-width: 220px;">Consumo do mês</th><th class="text-center">Ações</th></tr></thead>
+      <tbody>
+        {% for obj in object_list %}
+        <tr>
+          <td>{{ obj.username }}{% if obj.is_superuser %} <span class="badge bg-dark">admin</span>{% endif %}</td>
+          <td>{% if obj.ia_habilitado %}<span class="badge bg-success">Habilitado</span>{% else %}<span class="badge bg-secondary">Bloqueado</span>{% endif %}</td>
+          <td>{{ obj.ia_cota|milhar }}{% if not obj.ia_cota_propria %} <span class="text-muted small">(padrão)</span>{% endif %}</td>
+          <td data-order="{{ obj.consumo_mes }}">
+            {% include "ia/_barra_consumo.html" with situacao=obj.ia_situacao %}
+          </td>
+          <td class="text-center">
+            <a href="{% url 'ia-usuario-update' obj.pk %}" class="btn btn-sm btn-outline-primary" title="Editar acesso"><i class="bi bi-pencil"></i></a>
+          </td>
+        </tr>
+        {% empty %}<tr><td colspan="5" class="text-center text-muted py-4">Nenhum usuário encontrado.</td></tr>{% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% include "sobraNada/includes/pagination.html" %}
+{% endblock %}

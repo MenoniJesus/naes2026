@@ -1,0 +1,57 @@
+{% extends "website/modelo2.html" %}
+{% load crispy_forms_tags %}
+{% block title %}Configuração da IA | SobraNada{% endblock %}
+{% block breadcrumb %}<li class="breadcrumb-item active">IA · Configuração</li>{% endblock %}
+{% block content %}
+{% include "ia/_abas.html" %}
+<div class="row g-4">
+  <div class="col-lg-8">
+    <div class="card shadow-sm border-0">
+      <div class="card-header bg-gradient-primary text-white py-3">
+        <h4 class="mb-0 fs-5"><i class="bi bi-gear me-2"></i>Configuração da IA</h4>
+      </div>
+      <div class="card-body p-4">
+        <form method="post" autocomplete="off">
+          {% csrf_token %}
+          {{ form|crispy }}
+          <button type="submit" class="btn btn-primary px-4 mt-2"><i class="bi bi-check-circle me-2"></i>Salvar configuração</button>
+        </form>
+      </div>
+      {% if object.atualizado_por %}
+      <div class="card-footer bg-light small text-muted">
+        Última alteração por {{ object.atualizado_por }} em {{ object.atualizado_em|date:"d/m/Y H:i" }}.
+      </div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-lg-4">
+    <div class="card shadow-sm">
+      <div class="card-header bg-white fw-semibold"><i class="bi bi-plug me-2"></i>Testar conexão</div>
+      <div class="card-body">
+        <p class="small text-muted">Envia uma pergunta curta com o modelo e a chave <strong>salvos</strong>. O teste ignora a ativação e a cota, mas fica registrado na auditoria.</p>
+        <form method="post" action="{% url 'ia-configuracao-testar' %}" id="form-testar">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-outline-success w-100" id="btn-testar">
+            <i class="bi bi-lightning-charge me-2"></i>Testar conexão
+          </button>
+        </form>
+        {% if ultimo_teste %}
+        <hr>
+        <div class="small">
+          <div class="text-muted">Último teste</div>
+          <div>{{ ultimo_teste.criado_em|date:"d/m/Y H:i" }} · {% include "ia/_status.html" with status=ultimo_teste.status %}</div>
+          {% if ultimo_teste.erro %}<div class="text-danger mt-1">{{ ultimo_teste.erro|truncatechars:160 }}</div>{% endif %}
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>
+  $('#form-testar').on('submit', function () {
+    $('#btn-testar').prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2"></span>Testando...');
+  });
+</script>
+{% endblock %}
