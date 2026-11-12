@@ -17,9 +17,17 @@ dependencies = [
     "pillow>=12.2.0",
     "gunicorn>=26.0.0",
     "python-dotenv>=1.2.3",
+    "anthropic>=2.2.0",
+    "markdown>=3.11.2",
+    "nh3>=0.3.7",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=9.1.1",
+    "pytest-django>=4.14.0",
 ]
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "DjangoProject.settings"
+python_files = ["test_*.py", "tests.py"]
