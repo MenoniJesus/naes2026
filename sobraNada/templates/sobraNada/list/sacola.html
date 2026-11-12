@@ -29,8 +29,10 @@
           <td>{{ obj.get_status_display }}</td>
           <td class="text-center">
             <a href="{% url 'sacola-detail' obj.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
+            {% if obj.estabelecimento.user_id == user.id %}
             <a href="{% url 'sacola-update' obj.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
             <a href="{% url 'sacola-delete' obj.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+            {% endif %}
           </td>
         </tr>
         {% empty %}<tr><td colspan="7" class="text-center text-muted py-4">Nenhuma sacola cadastrada.</td></tr>{% endfor %}

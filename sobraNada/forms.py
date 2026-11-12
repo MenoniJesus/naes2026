@@ -5,7 +5,7 @@ from django.db.models import Q
 
 from . import precificacao
 from .models import (
-    Avaliacao, Estabelecimento, Notificacao, Perfil, Produto, Reserva, Sacola,
+    Avaliacao, Cidade, Endereco, Estabelecimento, Notificacao, Perfil, Produto, Reserva, Sacola,
 )
 
 WIDGET_DATA = forms.DateInput(attrs={"type": "date"})
@@ -24,6 +24,17 @@ class EstabelecimentoForm(forms.ModelForm):
         widgets = {"pickup_start": WIDGET_HORA, "pickup_end": WIDGET_HORA}
 
 
+class EnderecoForm(forms.ModelForm):
+    class Meta:
+        model = Endereco
+        fields = ["cidade", "street", "number", "complement", "neighborhood", "zip_code"]
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Cidade.__str__ mostra a UF: sem o select_related cada opção faria uma query.
+        self.fields["cidade"].queryset = Cidade.objects.select_related("estado")
+
+
 class PerfilForm(forms.ModelForm):
     class Meta:
         model = Perfil
@@ -37,9 +48,11 @@ class NotificacaoForm(forms.ModelForm):
 
 
 class ProdutoForm(forms.ModelForm):
+    """O estabelecimento e sempre o do usuario logado (definido na view)."""
+
     class Meta:
         model = Produto
-        fields = ["estabelecimento", "name", "description", "price", "is_active"]
+        fields = ["name", "description", "price", "is_active"]
 
 
 class SacolaForm(forms.ModelForm):
@@ -60,11 +73,12 @@ class SacolaForm(forms.ModelForm):
             "pickup_end": WIDGET_HORA,
         }
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, usuario=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["produtos"].queryset = (
-            Produto.objects.filter(is_active=True).select_related("estabelecimento")
-        )
+        produtos = Produto.objects.filter(is_active=True).select_related("estabelecimento")
+        if usuario is not None:
+            produtos = produtos.filter(estabelecimento__user=usuario)
+        self.fields["produtos"].queryset = produtos
 
     def clean_produtos(self):
         produtos = self.cleaned_data["produtos"]
@@ -178,4 +192,5 @@ class AvaliacaoForm(forms.ModelForm):
         else:
             elegiveis = elegiveis.filter(avaliacao__isnull=True)
 
-        self.fields["reserva"].queryset = elegiveis.select_related("sacola")
+        # Reserva.__str__ usa o username.
+        self.fields["reserva"].queryset = elegiveis.select_related("user")

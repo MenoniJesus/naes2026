@@ -25,6 +25,12 @@ class SacolaFilter(django_filters.FilterSet):
 
 
 class ReservaFilter(django_filters.FilterSet):
+    # Sacola.__str__ usa o estabelecimento dos produtos: sem o prefetch cada opção do select faria queries.
+    sacola = django_filters.ModelChoiceFilter(
+        queryset=Sacola.objects.prefetch_related('produtos__estabelecimento'),
+        label='Sacola',
+    )
+
     class Meta:
         model = Reserva
         fields = ['status', 'sacola']

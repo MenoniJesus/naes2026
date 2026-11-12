@@ -28,8 +28,10 @@
           <td>{% if obj.is_active %}<span class="badge bg-success">Sim</span>{% else %}<span class="badge bg-secondary">Não</span>{% endif %}</td>
           <td class="text-center">
             <a href="{% url 'produto-detail' obj.pk %}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-eye"></i></a>
+            {% if obj.estabelecimento.user_id == user.id %}
             <a href="{% url 'produto-update' obj.pk %}" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil"></i></a>
             <a href="{% url 'produto-delete' obj.pk %}" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+            {% endif %}
             {% if obj.is_active %}
             <form method="post" action="{% url 'carrinho-adicionar' obj.pk %}" class="d-inline">
               {% csrf_token %}

@@ -37,7 +37,9 @@
         {% if object.available_quantity %}
         <a href="{% url 'reserva-create' %}" class="btn btn-success"><i class="bi bi-bag-check me-2"></i>Reservar</a>
         {% endif %}
+        {% if object.estabelecimento.user_id == user.id %}
         <a href="{% url 'sacola-update' object.pk %}" class="btn btn-primary"><i class="bi bi-pencil me-2"></i>Editar</a>
+        {% endif %}
         <a href="#" class="btn btn-outline-secondary" onclick="window.history.back()"><i class="bi bi-arrow-left me-2"></i>Voltar</a>
       </div>
     </div>

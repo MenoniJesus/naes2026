@@ -26,7 +26,9 @@
         <p><strong>Criado em:</strong> {{ object.created_at|date:"d/m/Y H:i" }}</p>
       </div>
       <div class="card-footer bg-light p-3 d-flex gap-2">
+        {% if object.user_id == user.id %}
         <a href="{% url 'estabelecimento-update' object.pk %}" class="btn btn-primary"><i class="bi bi-pencil me-2"></i>Editar</a>
+        {% endif %}
         <a href="#" class="btn btn-outline-secondary" onclick="window.history.back()"><i class="bi bi-arrow-left me-2"></i>Voltar</a>
       </div>
     </div>

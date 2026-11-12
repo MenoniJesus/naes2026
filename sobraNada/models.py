@@ -19,6 +19,8 @@ class Estado(models.Model):
 
     class Meta:
         ordering = ["name"]
+        verbose_name = "estado"
+        verbose_name_plural = "estados"
 
     def __str__(self):
         return f"{self.name} ({self.uf})"
@@ -30,6 +32,8 @@ class Cidade(models.Model):
 
     class Meta:
         ordering = ["name"]
+        verbose_name = "cidade"
+        verbose_name_plural = "cidades"
 
     def __str__(self):
         return f"{self.name} - {self.estado.uf}"
@@ -50,6 +54,8 @@ class Endereco(models.Model):
 
     class Meta:
         ordering = ["street", "number"]
+        verbose_name = "endereço"
+        verbose_name_plural = "endereços"
 
     def __str__(self):
         return f"{self.street}, {self.number} - {self.neighborhood}"
@@ -69,6 +75,8 @@ class Perfil(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        verbose_name = "perfil"
+        verbose_name_plural = "perfis"
 
     def __str__(self):
         return f"{self.user.username}"
@@ -84,6 +92,8 @@ class Categoria(models.Model):
 
     class Meta:
         ordering = ["name"]
+        verbose_name = "categoria"
+        verbose_name_plural = "categorias"
 
     def __str__(self):
         return f"{self.name}"
@@ -112,6 +122,8 @@ class Estabelecimento(models.Model):
 
     class Meta:
         ordering = ["name"]
+        verbose_name = "estabelecimento"
+        verbose_name_plural = "estabelecimentos"
 
     def __str__(self):
         return f"{self.name}"
@@ -141,6 +153,8 @@ class Produto(models.Model):
 
     class Meta:
         ordering = ["name"]
+        verbose_name = "produto"
+        verbose_name_plural = "produtos"
 
     def __str__(self):
         return f"{self.name} ({self.estabelecimento.name})"
@@ -185,6 +199,8 @@ class Sacola(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        verbose_name = "sacola"
+        verbose_name_plural = "sacolas"
 
     def __str__(self):
         estabelecimento = self.estabelecimento
@@ -310,6 +326,8 @@ class Reserva(models.Model):
 
     class Meta:
         ordering = ["-reserved_at"]
+        verbose_name = "reserva"
+        verbose_name_plural = "reservas"
 
     def __str__(self):
         return f"Reserva #{self.pk} - {self.user.username}"
@@ -350,6 +368,8 @@ class Avaliacao(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        verbose_name = "avaliação"
+        verbose_name_plural = "avaliações"
 
     def __str__(self):
         return f"Avaliação #{self.pk} - {self.rating} estrelas"
@@ -377,6 +397,8 @@ class Notificacao(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        verbose_name = "notificação"
+        verbose_name_plural = "notificações"
 
     def __str__(self):
         return f"{self.title} - {self.user.username}"
